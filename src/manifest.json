@@ -1,0 +1,25 @@
+{
+    "version": "1",
+    "information": {
+        "name": "revenue-report-ex",
+        "displayName": "Revenue Report (EX)",
+        "description": "An extended and modified version of the Revenue Report plugin for UCRM.",
+        "url": "https://github.com/ucrm-plugins/revenue-report",
+        "version": "1.0.0",
+        "ucrmVersionCompliancy": {
+            "min": "2.14.1",
+            "max": null
+        },
+        "author": "Ryan Spaeth"
+    },
+    "menu": [
+        {
+            "key": "Reports",
+            "label": "Revenue Report (EX)",
+            "type": "admin",
+            "target": "iframe"
+        }
+    ],
+    "configuration": []
+}
+
