@@ -13,7 +13,32 @@ if(!isset($_GET) || !isset($_GET["frm-organization"]) || !isset($_GET["frm-since
 // DATA INITIALIZATION
 // =====================================================================================================================
 
-$data = [];
+$data = [
+    "services" => [
+        "counts" => [
+            "invoiced" => 0,
+            "paid" => 0,
+        ],
+    ],
+    "products" => [
+        "counts" => [
+            "invoiced" => 0,
+            "paid" => 0,
+        ],
+    ],
+    "surcharges" => [
+        "counts" => [
+            "invoiced" => 0,
+            "paid" => 0,
+        ],
+    ],
+    "others" => [
+        "counts" => [
+            "invoiced" => 0,
+            "paid" => 0,
+        ],
+    ],
+];
 
 // =====================================================================================================================
 // ORGANIZATION
