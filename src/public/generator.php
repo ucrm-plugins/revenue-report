@@ -13,12 +13,7 @@ if(!isset($_GET) || !isset($_GET["frm-organization"]) || !isset($_GET["frm-since
 // DATA INITIALIZATION
 // =====================================================================================================================
 
-$data = [
-    "services"      => [],
-    "products"      => [],
-    "surcharges"    => [],
-    "custom"        => [],
-];
+$data = [];
 
 // =====================================================================================================================
 // ORGANIZATION
@@ -54,11 +49,7 @@ $name = getenv("POSTGRES_DB");
 $user = getenv("POSTGRES_USER");
 $pass = getenv("POSTGRES_PASSWORD");
 
-//$organizationId = 1;
-
 $db = \MVQN\Data\Database::connect($host, (int)$port, $name, $user, $pass);
-
-
 
 // =====================================================================================================================
 // UNPAID/PARTIALLY PAID ITEMS
@@ -93,7 +84,7 @@ $results = $db->query(
     
     WHERE
         invoice.organization_id = $organizationId AND
-        (invoice.invoice_status = 1 OR invoice.invoice_status = 2 OR invoice.invoice_status = 3) AND
+        (invoice.invoice_status = 1 OR invoice.invoice_status = 3) AND
         invoice.created_date BETWEEN '$since' AND '$until';
 "
 )->fetchAll();
@@ -101,7 +92,7 @@ $results = $db->query(
 // TODO: Determine how we want to handle partially paid invoices and their respective items!
 
 // =====================================================================================================================
-// RESIDENTIAL CONTACT NAME FIX-UPS
+// DATA PREPARATION
 // =====================================================================================================================
 
 use UCRM\REST\Endpoints\Client;
@@ -136,11 +127,119 @@ foreach($results as &$result)
 
         // TODO: This would be a great place to cache the results of the client_id -> contact_name lookup!
     }
+
+    switch($result["discr"])
+    {
+        case "invoice_item_service":
+            populate($data, "services", $result);
+            break;
+
+        case "invoice_item_product":
+
+
+
+            populate($data, "products", $result);
+            break;
+
+        case "invoice_item_surcharge":
+            populate($data, "surcharges", $result);
+            break;
+
+        case "invoice_item_other":
+            populate($data, "others", $result);
+            break;
+
+        default:
+            die("Unknown Descriptor: '{$result['discr']}");
+    }
+
+
+
+
+
 }
 
 // FINALLY, render the results as a JSON object!
-echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+//echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+include(__DIR__."/results.php");
+exit();
 
 
+function populate(array &$data, string $section, array $result)
+{
+    $name = "";
 
+    if(isset($result["company_name"]))
+        $name = $result["company_name"];
+
+    if(isset($result["contact_name"]))
+        $name = $result["contact_name"];
+
+    $label = $result["label"]; // Always exists?
+
+    $data[$section][$label]["items"][$result["item_id"]] = [
+        "invoice_id" => $result["invoice_id"],
+        "invoice_number" => $result["invoice_number"],
+        "name" => $name,
+        "quantity" => $result["quantity"],
+        "price" => $result["price"],
+        "total" => $result["total"],
+        "taxable" => $result["taxable"],
+        "tax_rate1" => $result["tax_rate1"],
+        "tax_rate2" => $result["tax_rate2"],
+        "tax_rate3" => $result["tax_rate3"],
+        "paid" => $result["invoice_status"] === 3,
+    ];
+
+    switch($result["invoice_status"])
+    {
+        case 1:
+            $status = "invoiced";
+            break;
+        case 3:
+            $status = "paid";
+            break;
+        default: // Will NEVER be, per the SQL query!
+            die("Unsupported Invoice Status: '{$result['discr']}");
+    }
+
+    if(!array_key_exists("invoiced", $data[$section][$label]))
+        $data[$section][$label]["invoiced"] = [];
+    if(!array_key_exists("paid", $data[$section][$label]))
+        $data[$section][$label]["paid"] = [];
+
+    if(!array_key_exists("quantity", $data[$section][$label]["invoiced"]))
+        $data[$section][$label]["invoiced"]["quantity"] = 0;
+    if(!array_key_exists("quantity", $data[$section][$label]["paid"]))
+        $data[$section][$label]["paid"]["quantity"] = 0;
+
+    if(!array_key_exists("total", $data[$section][$label]["invoiced"]))
+        $data[$section][$label]["invoiced"]["total"] = 0;
+    if(!array_key_exists("total", $data[$section][$label]["paid"]))
+        $data[$section][$label]["paid"]["total"] = 0;
+
+    if(!array_key_exists("tax1", $data[$section][$label]["invoiced"]))
+        $data[$section][$label]["invoiced"]["tax1"] = 0;
+    if(!array_key_exists("tax1", $data[$section][$label]["paid"]))
+        $data[$section][$label]["paid"]["tax1"] = 0;
+
+    if(!array_key_exists("tax2", $data[$section][$label]["invoiced"]))
+        $data[$section][$label]["invoiced"]["tax2"] = 0;
+    if(!array_key_exists("tax2", $data[$section][$label]["paid"]))
+        $data[$section][$label]["paid"]["tax2"] = 0;
+
+    if(!array_key_exists("tax3", $data[$section][$label]["invoiced"]))
+        $data[$section][$label]["invoiced"]["tax3"] = 0;
+    if(!array_key_exists("tax3", $data[$section][$label]["paid"]))
+        $data[$section][$label]["paid"]["tax3"] = 0;
+
+    $data[$section][$label][$status]["quantity"] += $result["quantity"];
+    $data[$section][$label][$status]["total"] += $result["total"];
+    $data[$section][$label][$status]["tax1"] += ($result["total"] * ($result["tax_rate1"] / 100.0));
+    $data[$section][$label][$status]["tax2"] += ($result["total"] * ($result["tax_rate2"] / 100.0));
+    $data[$section][$label][$status]["tax3"] += ($result["total"] * ($result["tax_rate3"] / 100.0));
+
+
+}
 

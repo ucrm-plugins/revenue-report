@@ -36,55 +36,73 @@
     </a>
 </div>
 
-<div id="content" class="container-fluid ml-0 mr-0">
+
+
+<div id="content" class="container-fluid ml-0 mr-0 p-1 p-sm-3">
+
+
 
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card mb-1 mb-sm-3">
                 <div class="card-body">
-
+                    <div class="card-title">
+                        <h5>Filter</h5>
+                    </div>
                     <form id="report-form">
-                        <div class="form-row mb-3">
+                        <div class="form-row mb-2">
                             <div class="col-12 col-sm-12 col-md-12 col-lg-6">
                                 <label class="mb-0" for="frm-organization">Organization:</label>
-                                <select name="organization" id="frm-organization" class="form-control form-control-sm">
+                                <select name="organization" id="frm-organization" class="form-control form-control-sm mb-2">
                                     <?php
-                                        $organizations = \UCRM\REST\Endpoints\Organization::get()->toArray();
+                                    $organizations = \UCRM\REST\Endpoints\Organization::get()->toArray();
 
-                                        /** @var \UCRM\REST\Endpoints\Organization $organization */
-                                        foreach ($organizations as $key => $organization) {
-
-                                            printf('<option value="%d" %s>%s</option>',
-                                                $organization->getId(),
-                                                $organization->getSelected() ? "selected" : "",
-                                                $organization->getName()
-                                            );
-                                        }
+                                    /** @var \UCRM\REST\Endpoints\Organization $organization */
+                                    foreach ($organizations as $key => $organization) {
+                                        echo
+                                            "<option value='{$organization->getID()}' ".
+                                            ($organization->getSelected() ? "selected" : "").">".
+                                            $organization->getName()."</option>";
+                                    }
                                     ?>
                                 </select>
                             </div>
 
                             <div class="col-12 col-sm-6 col-md-6 col-lg-3">
                                 <label class="mb-0" for="frm-since">Since:</label>
-                                <input type="date" name="since" id="frm-since" placeholder="YYYY-MM-DD" class="form-control form-control-sm" value="<?php echo htmlspecialchars($result['since'] ?? '', ENT_QUOTES); ?>">
+                                <input type="date"
+                                       name="since"
+                                       id="frm-since"
+                                       placeholder="YYYY-MM-DD"
+                                       class="form-control form-control-sm mb-2"
+                                       value="<?php echo htmlspecialchars($result['since'] ?? '', ENT_QUOTES); ?>">
                             </div>
 
                             <div class="col-12 col-sm-6 col-md-6 col-lg-3">
                                 <label class="mb-0" for="frm-until">Until:</label>
-                                <input type="date" name="until" id="frm-until" placeholder="YYYY-MM-DD"
-                                       class="form-control form-control-sm"
+                                <input type="date"
+                                       name="until"
+                                       id="frm-until"
+                                       placeholder="YYYY-MM-DD"
+                                       class="form-control form-control-sm mb-2"
                                        value="<?php echo htmlspecialchars($result['until'] ?? '', ENT_QUOTES); ?>">
                             </div>
                         </div>
 
-                        <div class="form-row">
+                        <div class="form-row align-middle">
                             <div class="col-12 col-sm-6 col-md-6 col-lg-3">
                                 <button id="btn-submit" type="submit" class="btn btn-primary btn-sm btn-block">Generate</button>
                                 <span id="btn-loading" class="d-none btn btn-primary btn-sm btn-block disabled">
                                         Generating...
                                     </span>
                             </div>
+
+                            <div id="notice" class="col-12 col-sm-6 col-md-6 col-lg-6 offset-lg-3 mt-3 mt-sm-0 d-flex justify-content-center justify-content-sm-end">
+                                <div id="notice-message" class="align-self-center"></div>
+                            </div>
                         </div>
+
+
                     </form>
 
                 </div>
@@ -92,61 +110,14 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Services</h5>
-
-                    <span id="test">Test</span>
-
-                    <?php
+    <div id="results"></div>
 
 
 
 
-                    $servicePlans = \UCRM\REST\Endpoints\ServicePlan::get()->toArray();
-
-                    foreach($servicePlans as $servicePlan) {
-                    ?>
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="d-flex flex-row justify-content-between align-items-center">
-                                <div>
-                                    <span class="mr-2">W-00768</span>
-                                    <i class="fas fa-chevron-circle-right" id="service-plan-01-dropdown"></i>
-                                </div>
-                                <span><strong>$100.00</strong></span>
-                            </div>
-                        </div>
-
-                        <?php
-
-
-                        ?>
-
-                        <div id="service-plan-01-content" class="card-body">
-                            <div class="card-text">
-                                <div class="d-flex flex-row justify-content-between align-items-center">
-                                    <span>Donald Trump</span>
-                                    <span>$100.00</span>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                    <?php
-                    }
-                    ?>
-
-
-
-                </div>
-            </div>
-        </div>
-    </div>
 
 </div>
+
 
 
 
@@ -154,6 +125,7 @@
         integrity="sha384-zDnhMsjVZfS3hiP7oCBRmfjkQC4fzxVxFhBx8Hkz2aZX8gEvA/jsP3eXRCvzTofP"
         crossorigin="anonymous">
 </script>
+
 
 <script>
 
@@ -192,13 +164,33 @@
 
         }, function(data) {
 
-            console.log(data);
+            $notice = $("#notice");
+            $message = $("#notice-message");
 
-        })
+            if(data === null || data === "") {
+                $notice.addClass("text-danger");
+                $message.text("No results found!");
+            } else {
+                $notice.removeClass("text-danger");
+                $message.text("");
+            }
+
+            $("#results").html(data);
+        });
 
 
     });
 
+    $(window).on("resize", function() {
+
+        // Fix for iframe height with header!
+        let headerHeight = $("#header").outerHeight();
+        let windowHeight = $(window).outerHeight(); // Same as iframe!
+
+        $("#content").css("height", (windowHeight - headerHeight) + "px");
+
+
+    }).trigger("resize");
 
 
 
