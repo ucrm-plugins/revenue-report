@@ -38,6 +38,12 @@ $data = [
             "paid" => 0,
         ],
     ],
+    "fees" => [
+        "counts" => [
+            "invoiced" => 0,
+            "paid" => 0,
+        ],
+    ],
 ];
 
 // =====================================================================================================================
@@ -160,9 +166,6 @@ foreach($results as &$result)
             break;
 
         case "invoice_item_product":
-
-
-
             populate($data, "products", $result);
             break;
 
@@ -172,6 +175,10 @@ foreach($results as &$result)
 
         case "invoice_item_other":
             populate($data, "others", $result);
+            break;
+
+        case "invoice_item_fee":
+            populate($data, "fees", $result);
             break;
 
         default:

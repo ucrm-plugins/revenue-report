@@ -4,7 +4,8 @@ if (!$data || $data === [] || (
     $data["services"]["counts"]["invoiced"] === 0 && $data["services"]["counts"]["paid"] === 0 &&
     $data["products"]["counts"]["invoiced"] === 0 && $data["products"]["counts"]["paid"] === 0 &&
     $data["surcharges"]["counts"]["invoiced"] === 0 && $data["surcharges"]["counts"]["paid"] === 0 &&
-    $data["others"]["counts"]["invoiced"] === 0 && $data["others"]["counts"]["paid"] === 0))
+    $data["others"]["counts"]["invoiced"] === 0 && $data["others"]["counts"]["paid"] === 0 &&
+    $data["fees"]["counts"]["invoiced"] === 0 && $data["fees"]["counts"]["paid"] === 0))
     exit();
 
 //if(array_key_exists("services", $data) && $data["services"] !== [])
@@ -16,14 +17,18 @@ if (!$data || $data === [] || (
     $paidProductsCount = array_key_exists("products", $data) ? $data["products"]["counts"]["paid"] : 0;
     $paidSurchargesCount = array_key_exists("surcharges", $data) ? $data["surcharges"]["counts"]["paid"] : 0;
     $paidOthersCount = array_key_exists("others", $data) ? $data["others"]["counts"]["paid"] : 0;
+    $paidFeesCount = array_key_exists("fees", $data) ? $data["fees"]["counts"]["paid"] : 0;
 
     $invoicedServicesCount = array_key_exists("services", $data) ? $data["services"]["counts"]["invoiced"] + $data["services"]["counts"]["paid"] : 0;
     $invoicedProductsCount = array_key_exists("products", $data) ? $data["products"]["counts"]["invoiced"] + $data["products"]["counts"]["paid"] : 0;
     $invoicedSurchargesCount = array_key_exists("surcharges", $data) ? $data["surcharges"]["counts"]["invoiced"] + $data["surcharges"]["counts"]["paid"] : 0;
     $invoicedOthersCount = array_key_exists("others", $data) ? $data["others"]["counts"]["invoiced"] + $data["others"]["counts"]["paid"] : 0;
+    $invoicedFeesCount = array_key_exists("fees", $data) ? $data["fees"]["counts"]["invoiced"] + $data["fees"]["counts"]["paid"] : 0;
 
-    $paidChartData = "[$paidServicesCount, $paidProductsCount, $paidSurchargesCount, $paidOthersCount]";
-    $invoicedChartData = "[$invoicedServicesCount, $invoicedProductsCount, $invoicedSurchargesCount, $invoicedOthersCount]";
+    $paidChartData = "[$paidServicesCount, $paidProductsCount, $paidSurchargesCount, $paidOthersCount, $paidFeesCount]";
+    $invoicedChartData = "[$invoicedServicesCount, $invoicedProductsCount, $invoicedSurchargesCount, $invoicedOthersCount, $invoicedFeesCount]";
+
+    //echo "$paidFeesCount / $invoicedFeesCount";
 
     ?>
 
@@ -51,7 +56,7 @@ if (!$data || $data === [] || (
                                     type: "horizontalBar",
                                     data: {
                                         labels: [
-                                            "Services", "Products", "Surcharges", "Others"
+                                            "Services", "Products", "Surcharges", "Others", "Fees"
                                         ],
 
                                         datasets: [
@@ -62,7 +67,8 @@ if (!$data || $data === [] || (
                                                     "#FF0000",
                                                     "#FFFF00",
                                                     "#008000",
-                                                    "#0000FF"
+                                                    "#0000FF",
+                                                    "#FFA500"
                                                 ]
                                             },
                                             {
@@ -72,14 +78,15 @@ if (!$data || $data === [] || (
                                                     "rgba(256, 0, 0, 0.5)",
                                                     "rgba(256, 256, 0, 0.5)",
                                                     "rgba(0, 128, 0, 0.5)",
-                                                    "rgba(0, 0, 156, 0.5)"
-
+                                                    "rgba(0, 0, 156, 0.5)",
+                                                    "rgba(255, 165, 0, 0.5)"
                                                 ],
                                                 borderColor: [
                                                     "rgba(256, 0, 0, 1)",
                                                     "rgba(256, 256, 0, 1)",
                                                     "rgba(0, 128, 0, 1)",
-                                                    "rgba(0, 0, 156, 1)"
+                                                    "rgba(0, 0, 156, 1)",
+                                                    "rgba(255, 165, 0, 1)"
                                                 ],
                                                 borderWidth: 1
                                             }
@@ -101,7 +108,7 @@ if (!$data || $data === [] || (
                                         },
                                         title: {
                                             display: true,
-                                            text: "Invoiced Items",
+                                            text: "Revenue (Paid / Invoiced)",
                                             fontSize: 16
                                         },
                                         scales: {
@@ -180,7 +187,7 @@ if (!$data || $data === [] || (
                                 <h5 class="d-none d-sm-block"><?php echo ucfirst($type);?></h5>
                             </div>
 
-                            <div class="w-25 text-right" style="padding-right:0px;">
+                            <div class="w-25 text-right" style="padding-right:0;">
                                 <div>Quantity</div>
                                 <div style="font-size:0.75em;margin-top:-4px;">&nbsp;</div>
                             </div>
