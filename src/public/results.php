@@ -8,10 +8,194 @@ if(!$data || $data === [])
     // TODO: Find a more robust way of handling currency locales!
     setlocale(LC_MONETARY, \UCRM\Common\Config::getLanguage());
 
+    $paidServicesCount = array_key_exists("services", $data) ? $data["services"]["counts"]["paid"] : 0;
+    $paidProductsCount = array_key_exists("products", $data) ? $data["products"]["counts"]["paid"] : 0;
+    $paidSurchargesCount = array_key_exists("surcharges", $data) ? $data["surcharges"]["counts"]["paid"] : 0;
+    $paidOthersCount = array_key_exists("others", $data) ? $data["others"]["counts"]["paid"] : 0;
+
+    $invoicedServicesCount = array_key_exists("services", $data) ? $data["services"]["counts"]["invoiced"] : 0;
+    $invoicedProductsCount = array_key_exists("products", $data) ? $data["products"]["counts"]["invoiced"] : 0;
+    $invoicedSurchargesCount = array_key_exists("surcharges", $data) ? $data["surcharges"]["counts"]["invoiced"] : 0;
+    $invoicedOthersCount = array_key_exists("others", $data) ? $data["others"]["counts"]["invoiced"] : 0;
+
+    $paidChartData = "[$paidServicesCount, $paidProductsCount, $paidSurchargesCount, $paidOthersCount]";
+    $invoicedChartData = "[$invoicedServicesCount, $invoicedProductsCount, $invoicedSurchargesCount, $invoicedOthersCount]";
+
+    ?>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-1 mb-sm-3">
+                <div class="card-body">
+                    <div class="card-title">
+
+                        <div class="d-flex w-100 justify-content-center flex-wrap flex-md-nowrap">
+                            <div class="w-100 w-md-50 m-1 m-md-2">
+                                <canvas id="invoiced-chart" width="100" height="100"></canvas>
+                            </div>
+                            <div class="w-100 w-md-50 m-2 m-md-2">
+                                <canvas id="paid-chart" width="100" height="100"></canvas>
+                            </div>
+                        </div>
+
+
+                        <div class="d-flex w-100 justify-content-center">
+                            <div class="w-100">
+                                <canvas id="chart" width="100" height="100"></canvas>
+                            </div>
+                        </div>
+
+
+
+
+
+                        <script>
+                            $(function() {
+
+
+                                let i_ctx = document.getElementById("invoiced-chart").getContext('2d');
+                                let p_ctx = document.getElementById("paid-chart").getContext('2d');
+
+
+                                let b_ctx = document.getElementById("chart").getContext('2d');
+
+                                var invoicedChart = new Chart(i_ctx, {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: [
+                                            "Services", "Products", "Surcharges", "Others"
+                                        ],
+
+                                        datasets: [
+                                            {
+                                                data: <?php echo $invoicedChartData; ?>,
+                                                backgroundColor: [
+                                                    "#FF0000",
+                                                    "#FFFF00",
+                                                    "#008000",
+                                                    "#0000FF"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    options: {
+                                        legend: {
+                                            position: "bottom",
+                                            labels: {
+                                                boxWidth: 12
+                                            },
+                                            padding:{
+                                                left: 5
+                                            }
+
+
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: "Invoiced Items",
+                                            fontSize: 16
+                                        }
+                                    }
+                                });
+
+                                var paidChart = new Chart(p_ctx, {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: [
+                                            "Services", "Products", "Surcharges", "Others"
+                                        ],
+
+                                        datasets: [
+                                            {
+                                                data: <?php echo $paidChartData; ?>,
+
+                                                backgroundColor: [
+                                                    "#FF0000",
+                                                    "#FFFF00",
+                                                    "#008000",
+                                                    "#0000FF"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    options: {
+                                        legend: {
+                                            position: "bottom",
+                                            labels: {
+                                                boxWidth: 12
+                                            }
+
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: "Paid Items",
+                                            fontSize: 16
+                                        }
+                                    }
+                                });
+
+
+
+
+                                var chart = new Chart(b_ctx, {
+                                    type: "bar",
+                                    data: {
+                                        labels: [
+                                            "Services", "Products", "Surcharges", "Others"
+                                        ],
+
+                                        datasets: [
+                                            {
+                                                label: "Invoiced",
+                                                data: [4, 10, 1, 6],
+                                                backgroundColor: [
+                                                    "#FF0000",
+                                                    "#FFFF00",
+                                                    "#008000",
+                                                    "#0000FF"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    options: {
+                                        legend: {
+                                            position: "bottom",
+                                            labels: {
+                                                boxWidth: 12
+                                            },
+                                            padding:{
+                                                left: 5
+                                            }
+
+
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: "Invoiced Items",
+                                            fontSize: 16
+                                        }
+                                    }
+                                });
+
+
+
+                            });
+                        </script>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php
     foreach($data as $type => $results)
     {
         ?>
-        <div id="results" class="row">
+
+
+
+        <div class="row">
 
             <div class="col-12">
                 <div class="card mb-1 mb-sm-3">
@@ -45,7 +229,8 @@ if(!$data || $data === [])
                         <?php
                         foreach ($results as $name => $result)
                         {
-                            //$link = $url_prefix === "" ? "" : $url_prefix . $result["item_"]
+                            if($name === "counts")
+                                continue;
 
                             ?>
                             <div class="card">

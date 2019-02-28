@@ -29,8 +29,8 @@
 </head>
 
 <body>
-<div id="header">
-    <h1 class="float-left mr-3">Revenue Report</h1>
+<div id="header" class="text-center text-sm-left">
+    <h1 class="float-sm-left mr-sm-3 mb-2 mb-sm-0">Revenue Report</h1>
     <a href="https://github.com/ucrm-plugins/revenue-report" target="_blank" class="button button--icon-only">
         <img src="?/images/github/logo-32px.png" alt="GitHub" height=16>
     </a>
@@ -101,8 +101,6 @@
                                 <div id="notice-message" class="align-self-center"></div>
                             </div>
                         </div>
-
-
                     </form>
 
                 </div>
@@ -126,6 +124,8 @@
         crossorigin="anonymous">
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js">
+</script>
 
 <script>
 
@@ -176,6 +176,9 @@
             }
 
             $("#results").html(data);
+
+
+
         });
 
 

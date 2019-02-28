@@ -192,17 +192,29 @@ function populate(array &$data, string $section, array $result)
         "paid" => $result["invoice_status"] === 3,
     ];
 
+    if(!array_key_exists("counts", $data[$section]))
+        $data[$section]["counts"] = [
+            "invoiced" => 0,
+            "paid" => 0,
+        ];
+
     switch($result["invoice_status"])
     {
         case 1:
             $status = "invoiced";
+            $data[$section]["counts"]["invoiced"] += $result["quantity"];
             break;
         case 3:
             $status = "paid";
+            $data[$section]["counts"]["paid"] += $result["quantity"];
             break;
         default: // Will NEVER be, per the SQL query!
             die("Unsupported Invoice Status: '{$result['discr']}");
     }
+
+
+
+
 
     if(!array_key_exists("invoiced", $data[$section][$label]))
         $data[$section][$label]["invoiced"] = [];
