@@ -1,29 +1,34 @@
-# UCRM Plugin Template
+# Revenue Report (EX) Plugin for UCRM
 
-This is a simple plugin that allows end-users to configure a their UCRM to receive and handle data from the their
-associated TowerCoverage.com accounts.
+An extended and modified version of the Revenue Report plugin for UCRM.
 
 ## Installation
 
-1. Download the [Plugin](https://github.com/ucrm-plugins/template/raw/master/template.zip) and add it to the
+1. Download the [Plugin](https://github.com/ucrm-plugins/revenue-report/raw/master/revenue-report.zip) and add it to the
 System/Plugins in your UCRM.
-2. Configure the plugin as noted below and then "Save and Enable".
-3. ...
+2. No configuration is needed, simply click "Enable".
+3. Navigate to Reports -> Revenue Report (EX) and configure a period of time to view the reports.
 
+## Versions
 
-## Configuration
-
-**Verbose Debugging?**
-
-When enabled, adds additional debug output to the Plugin's log. 
-
-Recommended: `No`
-
+#### UCRM
+- This has not been tested on any stable versions of UCRM, but the manifest will allow installation as early as v2.14.1.
+-  All testing has been performed against a minimal data set, using v2.15.0-beta7.
 
 ## Features
 
 #### Localization
-COMING SOON
+- Some minimal currency conversions using the UCRM locale settings currently exist, but will need to be more thoroughly
+tested before claiming any localization support.
+- No translations have been done, as of yet!
+
+#### Charting
+- A simplistic bar chart showing the breakdown of invoiced/paid items in each category is the only currently supported
+charting.
+
+#### Categories
+- Currently only Services, Products, Surcharges and Custom items are reported.
+- More could be made available upon request.
 
 
 ## About
@@ -35,11 +40,11 @@ in the accompanying `vendor/` folder and can be updated and maintained manually 
 [composer](https://getcomposer.org/) if desired.
 
 ### Related Packages
-[ucrm-plugins/template](https://github.com/ucrm-plugins/template)\
-A plugin module for localization.
+[mvqn/ucrm-plugin-sdk](https://github.com/mvqn/ucrm-plugin-sdk)\
+An alternative UCRM SDK designed to ease Plugin development.
 
 ### Submitting bugs and feature requests
-Bugs and feature request are tracked on [Github](https://github.com/ucrm-plugins/template/issues)
+Bugs and feature request are tracked on [Github](https://github.com/ucrm-plugins/revenue-report/issues)
 
 ### Author
 Ryan Spaeth <[rspaeth@mvqn.net](mailto:rspaeth@mvqn.net)>
