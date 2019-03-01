@@ -252,8 +252,10 @@ foreach($data as $type => $results)
                                     $invoiced = $result["invoiced"]["total"];// + $i_tax;
                                     $paid     = $result["paid"]["total"];// + $p_tax;
 
-                                    $i_tax    = ($i_tax !== 0 ? money_format("%i", $i_tax) : "");
-                                    $p_tax    = ($p_tax !== 0 ? money_format("%i", $p_tax) : "");
+                                    //$i_tax    = ($i_tax !== 0 ? money_format("%i", $i_tax) : "");
+                                    //$p_tax    = ($p_tax !== 0 ? money_format("%i", $p_tax) : "");
+                                    $i_tax    = money_format("%i", $i_tax);
+                                    $p_tax    = money_format("%i", $p_tax);
 
                                     $quantity = $result["invoiced"]["quantity"] + $result["paid"]["quantity"];
                                     $invoiced = money_format("%i", $invoiced);
@@ -297,8 +299,9 @@ foreach($data as $type => $results)
 
                                 //$total    = $price + $tax;
 
-                                $in_tax    = !$item["paid"] ? money_format("%i", $tax) : "";
-                                $pd_tax    =  $item["paid"] ? money_format("%i", $tax) : "";
+
+                                $in_tax    = (!$item["paid"] && $tax !== 0.0) ? money_format("%i", $tax) : "";
+                                $pd_tax    = ($item["paid"] && $tax !== 0.0) ? money_format("%i", $tax) : "";
 
                                 $invoiced  = !$item["paid"] ? money_format("%i", $price) : "";
                                 $paid      =  $item["paid"] ? money_format("%i", $price) : "";
