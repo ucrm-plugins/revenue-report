@@ -67,6 +67,18 @@ RestClient::setHeaders([
     "X-Auth-App-Key: " . Settings::PLUGIN_APP_KEY
 ]);
 
+try
+{
+    Log::clear();
+    Log::info("Using REST URL: '".$restUrl."'");
+    $version = \UCRM\REST\Endpoints\Version::get();
+    Log::info("REST API Test : '".$version."'");
+}
+catch(\Exception $e)
+{
+    Log::error($e->getMessage());
+}
+
 // =====================================================================================================================
 // LOCALIZATION
 // =====================================================================================================================
