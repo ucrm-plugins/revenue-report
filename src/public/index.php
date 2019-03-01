@@ -55,14 +55,40 @@
                                 <label class="mb-0" for="frm-organization">Organization:</label>
                                 <select name="organization" id="frm-organization" class="form-control form-control-sm mb-2">
                                     <?php
-                                    $organizations = \UCRM\REST\Endpoints\Organization::get()->toArray();
+
+                                    // =================================================================================
+                                    // DATABASE CONNECTION
+                                    // =================================================================================
+
+                                    $host = getenv("POSTGRES_HOST");
+                                    $port = getenv("POSTGRES_PORT");
+                                    $name = getenv("POSTGRES_DB");
+                                    $user = getenv("POSTGRES_USER");
+                                    $pass = getenv("POSTGRES_PASSWORD");
+
+                                    $db = \MVQN\Data\Database::connect($host, (int)$port, $name, $user, $pass);
+
+                                    $organizations = $db->query(
+                                    "
+                                        SELECT organization_id, selected, name
+                                        FROM organization;
+                                    "
+                                    )->fetchAll();
+
+                                    //$organizations = \UCRM\REST\Endpoints\Organization::get()->toArray();
 
                                     /** @var \UCRM\REST\Endpoints\Organization $organization */
                                     foreach ($organizations as $key => $organization) {
+                                        /*
                                         echo
                                             "<option value='{$organization->getID()}' ".
                                             ($organization->getSelected() ? "selected" : "").">".
                                             $organization->getName()."</option>";
+                                        */
+                                        echo
+                                            "<option value='{$organization['organization_id']}' ".
+                                            ($organization['selected'] ? "selected" : "").">".
+                                            $organization['name']."</option>";
                                     }
                                     ?>
                                 </select>

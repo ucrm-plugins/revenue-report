@@ -87,7 +87,7 @@ $db = \MVQN\Data\Database::connect($host, (int)$port, $name, $user, $pass);
 // =====================================================================================================================
 
 $results = $db->query(
-"
+'
     SELECT
         item.item_id,
         item.invoice_id,
@@ -106,18 +106,21 @@ $results = $db->query(
         invoice.invoice_status,
         client.client_id,
         client.client_type,
-        client.company_name
+        client.company_name,
+        u.first_name,
+        u.last_name
         
     FROM invoice_item AS item
       
     INNER JOIN invoice ON item.invoice_id = invoice.invoice_id
     INNER JOIN client ON invoice.client_id = client.client_id
+    INNER JOIN "user" AS u ON client.user_id = u.user_id
     
     WHERE
-        invoice.organization_id = $organizationId AND
+        invoice.organization_id = '.$organizationId.' AND
         (invoice.invoice_status = 1 OR invoice.invoice_status = 3) AND
-        invoice.created_date BETWEEN '$since' AND '$until';
-"
+        invoice.created_date BETWEEN \''.$since.'\' AND \''.$until.'\';
+'
 )->fetchAll();
 
 // TODO: Determine how we want to handle partially paid invoices and their respective items!
@@ -131,6 +134,7 @@ use UCRM\REST\Endpoints\Client;
 // Loop through each of the matched invoice items...
 foreach($results as &$result)
 {
+
     // IF the current invoice item belongs to an invoice of a residential client...
     if($result["client_type"] === Client::CLIENT_TYPE_RESIDENTIAL)
     {
@@ -138,6 +142,7 @@ foreach($results as &$result)
         if (isset($result["company_name"]) || $result["company_name"] === null)
             unset($result["company_name"]);
 
+        /*
         // Then query the client contact's for the the one with the lowest id...
         $contacts = $db->query(
         "
@@ -152,12 +157,14 @@ foreach($results as &$result)
         // There should ALWAYS be at least contact, as the system requires, at minimum, a first and last name.
         if (count($contacts) < 1)
             die();
-
+        */
         // Now add the contact name to the current invoice item.
-        $result["contact_name"] = $contacts[0]["name"];
+        //$result["contact_name"] = $contacts[0]["name"];
+        $result["contact_name"] = $result["first_name"] ." ". $result["last_name"];
 
         // TODO: This would be a great place to cache the results of the client_id -> contact_name lookup!
     }
+
 
     switch($result["discr"])
     {
