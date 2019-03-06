@@ -217,17 +217,23 @@ foreach($data as $type => $results)
                     </div>
 
                     <?php
+                    $row_index = 0;
+
                     foreach ($results as $name => $result)
                     {
                         if($name === "counts")
                             continue;
 
+                        $section_id = "$type-$row_index-container";
                         ?>
                         <div class="card">
                             <div class="card-header p-2">
 
                                 <div class="d-flex flex-row align-items-center d-sm-none">
                                     <div class="w-100 border-bottom mb-1">
+                                        <a id="<?php echo $section_id.'-button'; ?>" class="toggle-link" style="text-decoration: none;" data-toggle="collapse" href="#<?php echo $section_id; ?>" aria-expanded="false" aria-controls="<?php echo $section_id; ?>">
+                                            <i class="rotate fas fa-chevron-circle-right mr-2"></i>
+                                        </a>
                                         <strong><?php echo $name;?></strong>
                                     </div>
                                 </div>
@@ -235,6 +241,9 @@ foreach($data as $type => $results)
                                 <div class="d-flex align-items-center">
                                     <div class="w-25">
                                         <div class="d-none d-sm-block">
+                                            <a id="<?php echo $section_id.'-button'; ?>" class="toggle-link" style="text-decoration: none;" data-toggle="collapse" href="#<?php echo $section_id; ?>" aria-expanded="false" aria-controls="<?php echo $section_id; ?>">
+                                                <i class="rotate fas fa-chevron-circle-right mr-2"></i>
+                                            </a>
                                             <strong><?php echo $name;?></strong>
                                         </div>
                                         <div style="font-size:0.75em;margin-top:-4px;">
@@ -283,6 +292,9 @@ foreach($data as $type => $results)
                                 </div>
                             </div>
 
+                            <div id="<?php echo $section_id; ?>" class="collapse in">
+                                <div class="card-body p-2">
+
                             <?php
                             foreach($result["items"] as $item)
                             {
@@ -308,7 +320,7 @@ foreach($data as $type => $results)
 
                                 ?>
 
-                                <div class="card-body p-2">
+                                <!-- <div class="card-body p-2 bg-primary"> -->
                                     <div class="card-text">
 
                                         <div class="d-flex flex-row align-items-center d-sm-none">
@@ -353,10 +365,20 @@ foreach($data as $type => $results)
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                <!-- </div>-->
                                 <?php
+
+                                $row_index++;
                             }
                             ?>
+                                </div>
+
+                            </div>
+                            <!--
+                            <div class="card-footer p-2 text-center">
+                                Pagination
+                            </div>
+                            -->
                         </div>
                         <?php
                     }
@@ -373,3 +395,56 @@ foreach($data as $type => $results)
 }
 
 ?>
+
+<style>
+    a.toggle-link, a.toggle-link:active, a.toggle-link:focus {
+        text-decoration: none;
+        outline: 0;
+    }
+
+    .rotate {
+        -moz-transition: all 0.1s linear;
+        -webkit-transition: all 0.1s linear;
+        transition: all 0.1s linear;
+    }
+
+    .rotate.down{
+        -ms-transform: rotate(90deg);
+        -moz-transform: rotate(90deg);
+        -webkit-transform: rotate(90deg);
+        transform: rotate(90deg);
+    }
+
+
+</style>
+
+
+<script>
+
+    $("a.toggle-link").on("click", function(e) {
+
+        let $this = $(this);
+
+        let $icon = $this.find("i.rotate");
+        $icon.toggleClass("down");
+
+        /*
+        if($this.attr("aria-expanded") === "true") {
+            // CLOSING: So animate the icon to closed.
+            console.log("CLOSE");
+        } else {
+            // OPENING: So animate the icon to opened.
+            console.log("OPEN");
+        }
+        */
+
+
+
+        //let $target = $(e.target);
+
+        //console.log(controls);
+        //console.log($target.attr("aria-expanded"));
+
+    });
+
+</script>
