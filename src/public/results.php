@@ -200,7 +200,7 @@ foreach($data as $type => $results)
         <a name="<?php echo ucfirst($type); ?>"></a>
 
         <!--------------------------------------------------------------------------------------------------------------
-        CATEGORY HEADER
+        CATEGORY CONTAINER
         --------------------------------------------------------------------------------------------------------------->
         <div class="col-12">
             <div class="card mb-1 mb-sm-3">
@@ -215,7 +215,7 @@ foreach($data as $type => $results)
                     </div>
 
                     <!--------------------------------------------------------------------------------------------------
-                    CATEGORY TITLE ROW
+                    CATEGORY HEADER
                     --------------------------------------------------------------------------------------------------->
                     <div class="d-flex flex-row align-items-center mb-2">
                         <!----------------------------------------------------------------------------------------------
@@ -244,13 +244,13 @@ foreach($data as $type => $results)
 
                     <?php
                     /*--------------------------------------------------------------------------------------------------
-                    ITEM GROUP
+                    GROUP
                     --------------------------------------------------------------------------------------------------*/
 
                     // Initialize a group counter to name each section accordingly.
                     $groupIndex = 0;
 
-                    // Loop through each group for this category...
+                    // Loop through each group in this category...
                     foreach ($results as $groupName => $result)
                     {
                         // IF the current key is "counts", THEN simply continue to the next group...
@@ -270,7 +270,7 @@ foreach($data as $type => $results)
                                       $result["paid"]["tax2"] +
                                       $result["paid"]["tax3"];
 
-                        // Format the tax amounts per the server's currency locale, set at the head of this script.
+                        // Format the tax amounts per the server's currency locale.
                         $iTax       = money_format("%i", $iTax);
                         $pTax       = money_format("%i", $pTax);
 
@@ -278,14 +278,14 @@ foreach($data as $type => $results)
                         $invoiced   = $result["invoiced"]["total"];
                         $paid       = $result["paid"]["total"];
 
-                        // Format the total amounts per the server's currency locale, set at the head of this script.
+                        // Format the total amounts per the server's currency locale.
                         $invoiced   = money_format("%i", $invoiced);
                         $paid       = money_format("%i", $paid);
 
                         // Calculate the accumulated quantities for both the invoiced and paid items in this group.
                         $quantity   = $result["invoiced"]["quantity"] + $result["paid"]["quantity"];
 
-                        // Format the quantities per the server's numeric locale, set at the head of this script.
+                        // Format the quantities per the server's numeric locale.
                         $quantity   = number_format($quantity, 2);
                         ?>
 
@@ -294,7 +294,6 @@ foreach($data as $type => $results)
                         ----------------------------------------------------------------------------------------------->
                         <div class="card">
                             <div class="card-header p-2">
-
                                 <!--------------------------------------------------------------------------------------
                                 GROUP TITLE: Mobile Only (XS)
                                 --------------------------------------------------------------------------------------->
@@ -316,7 +315,7 @@ foreach($data as $type => $results)
                                 </div>
 
                                 <!--------------------------------------------------------------------------------------
-                                GROUP TITLE ROW
+                                GROUP HEADER
                                 --------------------------------------------------------------------------------------->
                                 <div class="d-flex flex-row align-items-start">
                                     <!----------------------------------------------------------------------------------
@@ -339,10 +338,9 @@ foreach($data as $type => $results)
                                         </div>
                                     </div>
 
-                                    <?php
-
-
-                                    ?>
+                                    <!----------------------------------------------------------------------------------
+                                    GROUP TOTALS
+                                    ----------------------------------------------------------------------------------->
                                     <div class="w-25 text-right">
                                         <strong><?php echo $quantity;?></strong>
                                         <div style="font-size:0.75em;margin-top:-4px;">
@@ -364,26 +362,47 @@ foreach($data as $type => $results)
                                 </div>
                             </div>
 
-
-
+                            <!------------------------------------------------------------------------------------------
+                            GROUP BODY
+                            ------------------------------------------------------------------------------------------->
                             <div id="<?php echo $section_id; ?>" class="collapse in">
                                 <div class="card-body p-2">
 
                                     <?php
+                                    /*----------------------------------------------------------------------------------
+                                    ITEMS
+                                    ----------------------------------------------------------------------------------*/
+
+                                    // Loop through each item in this group...
                                     foreach($result["items"] as $item)
                                     {
-                                        //var_dump($item);
+                                        // Get the quantity for the current item.
+                                        $quantity   = $item["quantity"];
 
-                                        $quantity = $item["quantity"];
+                                        // Format the quantity per the server's numeric locale.
+                                        $quantity   = number_format($quantity, 2);
+
+                                        // Get the (unit) price for the current item.
                                         $unit     = $item["price"];
+
+                                        // TODO: Should we calculate the $quantity * $unit to verify $price???
+
+                                        // Get the total of for the current item.
                                         $price    = $item["total"];
 
-                                        $tax      = (($item["tax_rate1"] +
-                                                    $item["tax_rate2"] +
-                                                    $item["tax_rate3"]) / 100.0) *
-                                                    $price;
+                                        // TODO: Verify consistency when the new compound taxes arrive in 2.16.0-beta1!
 
-                                        //$total    = $price + $tax;
+                                        // Calculate the total tax for the current item.
+                                        // NOTE: Tax amounts here are as percentages and need to be coerced, as below.
+                                        $tax      = (
+                                                        (
+                                                            $item["tax_rate1"] +
+                                                            $item["tax_rate2"] +
+                                                            $item["tax_rate3"]
+                                                        ) / 100.0
+                                                    ) * $price;
+
+
 
 
                                         $in_tax    = (!$item["paid"] && $tax !== 0.0) ? money_format("%i", $tax) : "";
@@ -453,11 +472,11 @@ foreach($data as $type => $results)
 
 
                                 ?>
-
+                                <!--
                                 <div class="card-footer p-2 text-center">
                                     Pagination
                                 </div>
-
+                                -->
                             </div>
 
                         </div>

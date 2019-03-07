@@ -60,6 +60,10 @@ $restUrl =
         (isset($_SERVER['HTTPS']) ? "https://localhost/" : "http://localhost/"),        // By initial request
     "/")."/api/v1.0";
 
+// OVERRIDE WITH KNOWN GOOD VALUES!!!
+// TODO: Using to debug some "unable to connect" errors by cURL!
+$restUrl = (isset($_SERVER['HTTPS']) ? "https://localhost" : "http://localhost")."/api/v1.0";
+
 // Configure the REST Client...
 RestClient::setBaseUrl($restUrl);
 RestClient::setHeaders([
