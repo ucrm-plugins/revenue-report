@@ -16,8 +16,9 @@ if (!$data || $data === [] || (
 // LOCALIZATION
 // =====================================================================================================================
 
-// TODO: Find a more robust way of handling currency locales!
+// TODO: Find a more robust way of handling numeric and currency locales???
 setlocale(LC_MONETARY, \UCRM\Common\Config::getLanguage());
+setlocale(LC_NUMERIC, \UCRM\Common\Config::getLanguage());
 
 // =====================================================================================================================
 // DATA PREPARATION
@@ -174,34 +175,59 @@ $invoicedChartData          = implode(",",
     </div>
 </div>
 
+
+
 <?php
+/*----------------------------------------------------------------------------------------------------------------------
+RESULTS
+----------------------------------------------------------------------------------------------------------------------*/
+
+// Loop through each category of results...
 foreach($data as $type => $results)
 {
+    // IF the current category has no results to display, THEN simply continue to the next category...
     if($results["counts"]["invoiced"] === 0 && $results["counts"]["paid"] === 0)
         continue;
-
     ?>
 
-
-
+    <!------------------------------------------------------------------------------------------------------------------
+    CATEGORY ROW: Services/Products/Surcharges/Others/Fees
+    ------------------------------------------------------------------------------------------------------------------->
     <div class="row">
+        <!--------------------------------------------------------------------------------------------------------------
+        CATEGORY ANCHOR: Page Navigation
+        --------------------------------------------------------------------------------------------------------------->
         <a name="<?php echo ucfirst($type); ?>"></a>
 
+        <!--------------------------------------------------------------------------------------------------------------
+        CATEGORY HEADER
+        --------------------------------------------------------------------------------------------------------------->
         <div class="col-12">
             <div class="card mb-1 mb-sm-3">
                 <div class="card-body">
-
+                    <!--------------------------------------------------------------------------------------------------
+                    CATEGORY TITLE: Mobile Only (XS)
+                    --------------------------------------------------------------------------------------------------->
                     <div class="d-flex flex-row align-items-center d-sm-none">
                         <div class="w-100 border-bottom mb-1">
                             <h5><?php echo ucfirst($type);?></h5>
                         </div>
                     </div>
 
+                    <!--------------------------------------------------------------------------------------------------
+                    CATEGORY TITLE ROW
+                    --------------------------------------------------------------------------------------------------->
                     <div class="d-flex flex-row align-items-center mb-2">
+                        <!----------------------------------------------------------------------------------------------
+                        CATEGORY TITLE: All Other Sizes (SM-XL)
+                        ----------------------------------------------------------------------------------------------->
                         <div class="card-title mb-0 w-25">
                             <h5 class="d-none d-sm-block"><?php echo ucfirst($type);?></h5>
                         </div>
 
+                        <!----------------------------------------------------------------------------------------------
+                        CATEGORY LEGEND
+                        ----------------------------------------------------------------------------------------------->
                         <div class="w-25 text-right" style="padding-right:0;">
                             <div>Quantity</div>
                             <div style="font-size:0.75em;margin-top:-4px;">&nbsp;</div>
@@ -217,58 +243,104 @@ foreach($data as $type => $results)
                     </div>
 
                     <?php
-                    $row_index = 0;
+                    /*--------------------------------------------------------------------------------------------------
+                    ITEM GROUP
+                    --------------------------------------------------------------------------------------------------*/
 
-                    foreach ($results as $name => $result)
+                    // Initialize a group counter to name each section accordingly.
+                    $groupIndex = 0;
+
+                    // Loop through each group for this category...
+                    foreach ($results as $groupName => $result)
                     {
-                        if($name === "counts")
+                        // IF the current key is "counts", THEN simply continue to the next group...
+                        if($groupName === "counts")
                             continue;
 
-                        $section_id = "$type-$row_index-container";
+                        // Generate a unique ID for the current group's card, used for the collapse.
+                        $section_id = "$type-$groupIndex-card";
+
+                        // TODO: Verify consistency when the new compound taxes arrive in 2.16.0-beta1!
+
+                        // Calculate the accumulated taxes for both the invoiced and paid items in this group.
+                        $iTax       = $result["invoiced"]["tax1"] +
+                                      $result["invoiced"]["tax2"] +
+                                      $result["invoiced"]["tax3"];
+                        $pTax       = $result["paid"]["tax1"] +
+                                      $result["paid"]["tax2"] +
+                                      $result["paid"]["tax3"];
+
+                        // Format the tax amounts per the server's currency locale, set at the head of this script.
+                        $iTax       = money_format("%i", $iTax);
+                        $pTax       = money_format("%i", $pTax);
+
+                        // Calculate the accumulated totals for both the invoiced and paid items in this group.
+                        $invoiced   = $result["invoiced"]["total"];
+                        $paid       = $result["paid"]["total"];
+
+                        // Format the total amounts per the server's currency locale, set at the head of this script.
+                        $invoiced   = money_format("%i", $invoiced);
+                        $paid       = money_format("%i", $paid);
+
+                        // Calculate the accumulated quantities for both the invoiced and paid items in this group.
+                        $quantity   = $result["invoiced"]["quantity"] + $result["paid"]["quantity"];
+
+                        // Format the quantities per the server's numeric locale, set at the head of this script.
+                        $quantity   = number_format($quantity, 2);
                         ?>
+
+                        <!----------------------------------------------------------------------------------------------
+                        GROUP CARD
+                        ----------------------------------------------------------------------------------------------->
                         <div class="card">
                             <div class="card-header p-2">
 
-                                <div class="d-flex flex-row align-items-center d-sm-none">
+                                <!--------------------------------------------------------------------------------------
+                                GROUP TITLE: Mobile Only (XS)
+                                --------------------------------------------------------------------------------------->
+                                <div class="d-flex flex-row align-items-start d-sm-none">
                                     <div class="w-100 border-bottom mb-1">
-                                        <a id="<?php echo $section_id.'-button'; ?>" class="toggle-link" style="text-decoration: none;" data-toggle="collapse" href="#<?php echo $section_id; ?>" aria-expanded="false" aria-controls="<?php echo $section_id; ?>">
+                                        <a  id="<?php echo $section_id.'-button'; ?>"
+                                            class="toggle-link"
+                                            style="text-decoration: none;"
+                                            data-toggle="collapse"
+                                            href="#<?php echo $section_id; ?>"
+                                            aria-expanded="false"
+                                            aria-controls="<?php echo $section_id; ?>">
+
                                             <i class="rotate fas fa-chevron-circle-right mr-2"></i>
                                         </a>
-                                        <strong><?php echo $name;?></strong>
+
+                                        <strong><?php echo $groupName;?></strong>
                                     </div>
                                 </div>
 
-                                <div class="d-flex align-items-center">
+                                <!--------------------------------------------------------------------------------------
+                                GROUP TITLE ROW
+                                --------------------------------------------------------------------------------------->
+                                <div class="d-flex flex-row align-items-start">
+                                    <!----------------------------------------------------------------------------------
+                                    GROUP TITLE: All Other Sizes (SM-XL)
+                                    ----------------------------------------------------------------------------------->
                                     <div class="w-25">
                                         <div class="d-none d-sm-block">
-                                            <a id="<?php echo $section_id.'-button'; ?>" class="toggle-link" style="text-decoration: none;" data-toggle="collapse" href="#<?php echo $section_id; ?>" aria-expanded="false" aria-controls="<?php echo $section_id; ?>">
+                                            <a  id="<?php echo $section_id.'-button'; ?>"
+                                                class="toggle-link"
+                                                style="text-decoration: none;"
+                                                data-toggle="collapse"
+                                                href="#<?php echo $section_id; ?>"
+                                                aria-expanded="false"
+                                                aria-controls="<?php echo $section_id; ?>">
+
                                                 <i class="rotate fas fa-chevron-circle-right mr-2"></i>
                                             </a>
-                                            <strong><?php echo $name;?></strong>
-                                        </div>
-                                        <div style="font-size:0.75em;margin-top:-4px;">
-                                            <?php echo "&nbsp"; ?>
+
+                                            <strong><?php echo $groupName;?></strong>
                                         </div>
                                     </div>
+
                                     <?php
-                                    $i_tax    = $result["invoiced"]["tax1"] +
-                                                $result["invoiced"]["tax2"] +
-                                                $result["invoiced"]["tax3"];
-                                    $p_tax    = $result["paid"]["tax1"] +
-                                                $result["paid"]["tax2"] +
-                                                $result["paid"]["tax3"];
 
-                                    $invoiced = $result["invoiced"]["total"];// + $i_tax;
-                                    $paid     = $result["paid"]["total"];// + $p_tax;
-
-                                    //$i_tax    = ($i_tax !== 0 ? money_format("%i", $i_tax) : "");
-                                    //$p_tax    = ($p_tax !== 0 ? money_format("%i", $p_tax) : "");
-                                    $i_tax    = money_format("%i", $i_tax);
-                                    $p_tax    = money_format("%i", $p_tax);
-
-                                    $quantity = $result["invoiced"]["quantity"] + $result["paid"]["quantity"];
-                                    $invoiced = money_format("%i", $invoiced);
-                                    $paid     = money_format("%i", $paid);
 
                                     ?>
                                     <div class="w-25 text-right">
@@ -280,105 +352,114 @@ foreach($data as $type => $results)
                                     <div class="w-25 text-right">
                                         <strong><?php echo $invoiced;?></strong>
                                         <div style="font-size:0.75em;margin-top:-4px;">
-                                            <?php echo ($i_tax !== "" ? "+$i_tax" : "&nbsp;"); ?>
+                                            <?php echo ($iTax !== "" ? "+$iTax" : "&nbsp;"); ?>
                                         </div>
                                     </div>
                                     <div class="w-25 text-right">
                                         <strong><?php echo $paid;?></strong>
                                         <div style="font-size:0.75em;margin-top:-4px;">
-                                            <?php echo ($p_tax !== "" ? "+$p_tax" : "&nbsp;"); ?>
+                                            <?php echo ($pTax !== "" ? "+$pTax" : "&nbsp;"); ?>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+
 
                             <div id="<?php echo $section_id; ?>" class="collapse in">
                                 <div class="card-body p-2">
 
-                            <?php
-                            foreach($result["items"] as $item)
-                            {
-                                //var_dump($item);
+                                    <?php
+                                    foreach($result["items"] as $item)
+                                    {
+                                        //var_dump($item);
 
-                                $quantity = $item["quantity"];
-                                $unit     = $item["price"];
-                                $price    = $item["total"];
+                                        $quantity = $item["quantity"];
+                                        $unit     = $item["price"];
+                                        $price    = $item["total"];
 
-                                $tax      = (($item["tax_rate1"] +
-                                            $item["tax_rate2"] +
-                                            $item["tax_rate3"]) / 100.0) *
-                                            $price;
+                                        $tax      = (($item["tax_rate1"] +
+                                                    $item["tax_rate2"] +
+                                                    $item["tax_rate3"]) / 100.0) *
+                                                    $price;
 
-                                //$total    = $price + $tax;
+                                        //$total    = $price + $tax;
 
 
-                                $in_tax    = (!$item["paid"] && $tax !== 0.0) ? money_format("%i", $tax) : "";
-                                $pd_tax    = ($item["paid"] && $tax !== 0.0) ? money_format("%i", $tax) : "";
+                                        $in_tax    = (!$item["paid"] && $tax !== 0.0) ? money_format("%i", $tax) : "";
+                                        $pd_tax    = ($item["paid"] && $tax !== 0.0) ? money_format("%i", $tax) : "";
 
-                                $invoiced  = !$item["paid"] ? money_format("%i", $price) : "";
-                                $paid      =  $item["paid"] ? money_format("%i", $price) : "";
+                                        $invoiced  = !$item["paid"] ? money_format("%i", $price) : "";
+                                        $paid      =  $item["paid"] ? money_format("%i", $price) : "";
 
-                                ?>
+                                        ?>
 
-                                <!-- <div class="card-body p-2 bg-primary"> -->
-                                    <div class="card-text">
+                                        <!-- <div class="card-body p-2 bg-primary"> -->
+                                            <div class="card-text">
 
-                                        <div class="d-flex flex-row align-items-center d-sm-none">
-                                            <div class="w-100 border-bottom mb-1">
-                                                <div><?php echo $item["name"];?></div>
-                                                <div style="font-size:0.75em;margin-top:-4px;">
-                                                    <a  href="/billing/invoice/<?php echo $item['invoice_id'] ?>"
-                                                        target="_parent">
-                                                        Invoice # <?php echo $item["invoice_number"]?>
-                                                    </a>
+                                                <div class="d-flex flex-row align-items-center d-sm-none">
+                                                    <div class="w-100 border-bottom mb-1">
+                                                        <div><?php echo $item["name"];?></div>
+                                                        <div style="font-size:0.75em;margin-top:-4px;">
+                                                            <a  href="/billing/invoice/<?php echo $item['invoice_id'] ?>"
+                                                                target="_parent">
+                                                                Invoice # <?php echo $item["invoice_number"]?>
+                                                            </a>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
 
-                                        <div class="d-flex flex-row justify-content-between align-items-center">
-                                            <div class="w-25">
-                                                <div class="d-none d-sm-block">
-                                                    <div><?php echo $item["name"];?></div>
-                                                    <div style="font-size:0.75em;margin-top:-4px;">
-                                                        <a  href="/billing/invoice/<?php echo $item['invoice_id'] ?>"
-                                                            target="_parent">
-                                                            Invoice # <?php echo $item["invoice_number"]?>
-                                                        </a>
+                                                <div class="d-flex flex-row justify-content-between align-items-center">
+                                                    <div class="w-25">
+                                                        <div class="d-none d-sm-block">
+                                                            <div><?php echo $item["name"];?></div>
+                                                            <div style="font-size:0.75em;margin-top:-4px;">
+                                                                <a  href="/billing/invoice/<?php echo $item['invoice_id'] ?>"
+                                                                    target="_parent">
+                                                                    Invoice # <?php echo $item["invoice_number"]?>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="w-25 text-right">
+                                                        <div><?php echo $quantity;?></div>
+                                                        <div style="font-size:0.75em;margin-top:-4px;">&nbsp;</div>
+                                                    </div>
+                                                    <div class="w-25 text-right">
+                                                        <div><?php echo $invoiced;?></div>
+                                                        <div style="font-size:0.75em;margin-top:-4px;">
+                                                            <?php echo ($in_tax !== "" ? "+$in_tax" : "&nbsp;"); ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="w-25 text-right">
+                                                        <div><?php echo $paid;?></div>
+                                                        <div style="font-size:0.75em;margin-top:-4px;">
+                                                            <?php echo ($pd_tax !== "" ? "+$pd_tax" : "&nbsp;"); ?>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="w-25 text-right">
-                                                <div><?php echo $quantity;?></div>
-                                                <div style="font-size:0.75em;margin-top:-4px;">&nbsp;</div>
-                                            </div>
-                                            <div class="w-25 text-right">
-                                                <div><?php echo $invoiced;?></div>
-                                                <div style="font-size:0.75em;margin-top:-4px;">
-                                                    <?php echo ($in_tax !== "" ? "+$in_tax" : "&nbsp;"); ?>
-                                                </div>
-                                            </div>
-                                            <div class="w-25 text-right">
-                                                <div><?php echo $paid;?></div>
-                                                <div style="font-size:0.75em;margin-top:-4px;">
-                                                    <?php echo ($pd_tax !== "" ? "+$pd_tax" : "&nbsp;"); ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <!-- </div>-->
+                                        <!-- </div>-->
+                                        <?php
+
+                                        $groupIndex++;
+                                    }
+                                    ?>
+                                </div>
+
                                 <?php
 
-                                $row_index++;
-                            }
-                            ?>
+
+
+
+                                ?>
+
+                                <div class="card-footer p-2 text-center">
+                                    Pagination
                                 </div>
 
                             </div>
-                            <!--
-                            <div class="card-footer p-2 text-center">
-                                Pagination
-                            </div>
-                            -->
+
                         </div>
                         <?php
                     }
