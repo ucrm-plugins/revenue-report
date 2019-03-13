@@ -53,12 +53,14 @@ if(file_exists(__DIR__."/../.env"))
 // =====================================================================================================================
 
 // Generate the REST API URL from either an ENV variable (including from .env file),  or fallback to localhost.
+/*
 $restUrl =
     rtrim(
         getenv("REST_URL") ?:                                                           // .env (or ENV variable)
         Settings::UCRM_LOCAL_URL ?:                                                     // ucrm.json
         (isset($_SERVER['HTTPS']) ? "https://localhost/" : "http://localhost/"),        // By initial request
     "/")."/api/v1.0";
+*/
 
 // OVERRIDE WITH KNOWN GOOD VALUES!!!
 // TODO: Using to debug some "unable to connect" errors by cURL!
@@ -186,7 +188,9 @@ $container['logger'] = function (\Slim\Container $container)
 
 
 // Applied in Ascending order, bottom up!
-//$app->add(new \UCRM\Routing\Middleware\PluginAuthentication());
+$app->add(new \UCRM\HTTP\Slim\Middleware\PluginAuthentication($container, function(\UCRM\Sessions\SessionUser $user) {
+    return ($user->getUserGroup() === "Admin Group");
+}));
 $app->add(new QueryStringRouter("/index.php"));
 //$app->add(new QueryStringRouter("/test.html"));
 
