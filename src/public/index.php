@@ -47,31 +47,70 @@
 
 <body>
 
+<!----------------------------------------------------------------------------------------------------------------------
+Plugin Header Row
+TODO: Convert this to a UI element!
+UI::renderHeader("Revenue Report", "ucrm-plugins/revenue-report");
+----------------------------------------------------------------------------------------------------------------------->
 <div id="header" class="text-center text-sm-left">
-    <h1 class="float-sm-left mr-sm-3 mb-2 mb-sm-0">Revenue Report</h1>
-    <a href="https://github.com/ucrm-plugins/revenue-report" target="_blank" class="button button--icon-only">
+    <h1
+        class="float-sm-left mr-sm-3 mb-2 mb-sm-0">
+        <!-- Plugin Title -->
+        Revenue Report
+    </h1>
+    <a
+        class="btn btn-sm btn-outline-secondary"
+        href="https://github.com/ucrm-plugins/revenue-report"
+        target="_blank">
+        <!-- Link to GitHub Repo Button -->
         <img src="?/images/github/logo-32px.png" alt="GitHub" height=16>
+    </a>
+    <a
+        class="btn btn-sm btn-outline-success float-sm-right"
+        href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YGDTYH2P6WJNN&source=url"
+        target="_blank">
+        <!-- PayPal Donations Button -->
+        Donate
     </a>
 </div>
 
-<script>
-    console.log("BASE_URL: \n<?php echo BASE_URL; ?>");
-</script>
-
+<!----------------------------------------------------------------------------------------------------------------------
+Plugin Content
+----------------------------------------------------------------------------------------------------------------------->
 <div id="content" class="container-fluid ml-0 mr-0 p-1 p-sm-3">
-
+    <!------------------------------------------------------------------------------------------------------------------
+    Revenue Report Filter
+    ------------------------------------------------------------------------------------------------------------------->
     <div class="row">
         <div class="col-12">
             <div class="card mb-1 mb-sm-3">
                 <div class="card-body">
+                    <!--------------------------------------------------------------------------------------------------
+                    Filter Title
+                    --------------------------------------------------------------------------------------------------->
                     <div class="card-title">
                         <h5>Filter</h5>
                     </div>
+
+                    <!--------------------------------------------------------------------------------------------------
+                    Filter Form
+                    --------------------------------------------------------------------------------------------------->
                     <form id="report-form">
-                        <div class="form-row mb-2">
+                        <div class="form-row">
+                            <!------------------------------------------------------------------------------------------
+                            Filter Organization
+                            ------------------------------------------------------------------------------------------->
                             <div class="col-12 col-sm-12 col-md-12 col-lg-6">
-                                <label class="mb-0" for="frm-organization">Organization:</label>
-                                <select name="organization" id="frm-organization" class="form-control form-control-sm mb-2">
+                                <label
+                                    class="mb-0"
+                                    for="frm-organization">
+                                    Organization:
+                                </label>
+                                <select
+                                    id="frm-organization"
+                                    class="form-control form-control-sm mb-2"
+                                    name="organization">
+
                                     <?php
 
                                     // =================================================================================
@@ -86,6 +125,7 @@
 
                                     $db = \MVQN\Data\Database::connect($host, (int)$port, $name, $user, $pass);
 
+                                    // Query the database for all organizations.
                                     $organizations = $db->query(
                                     "
                                         SELECT organization_id, selected, name
@@ -93,16 +133,12 @@
                                     "
                                     )->fetchAll();
 
-                                    //$organizations = \UCRM\REST\Endpoints\Organization::get()->toArray();
+                                    // Loop through each organization...
+                                    foreach ($organizations as $key => $organization)
+                                    {
+                                        /** @var \UCRM\REST\Endpoints\Organization $organization */
 
-                                    /** @var \UCRM\REST\Endpoints\Organization $organization */
-                                    foreach ($organizations as $key => $organization) {
-                                        /*
-                                        echo
-                                            "<option value='{$organization->getID()}' ".
-                                            ($organization->getSelected() ? "selected" : "").">".
-                                            $organization->getName()."</option>";
-                                        */
+                                        // Add the current organization and flag it as selected when set as the default!
                                         echo
                                             "<option value='{$organization['organization_id']}' ".
                                             ($organization['selected'] ? "selected" : "").">".
@@ -112,45 +148,118 @@
                                 </select>
                             </div>
 
+                            <!------------------------------------------------------------------------------------------
+                            Filter Since
+                            ------------------------------------------------------------------------------------------->
                             <div class="col-12 col-sm-6 col-md-6 col-lg-3">
-                                <label class="mb-0" for="frm-since">Since:</label>
-                                <input type="date"
-                                       name="since"
-                                       id="frm-since"
-                                       placeholder="YYYY-MM-DD"
-                                       class="form-control form-control-sm mb-2"
-                                       value="<?php echo htmlspecialchars($result['since'] ?? '', ENT_QUOTES); ?>">
+                                <label
+                                    class="mb-0"
+                                    for="frm-since">
+                                    Since:
+                                </label>
+                                <input
+                                    id="frm-since"
+                                    class="form-control form-control-sm mb-2"
+                                    type="date"
+                                    name="since"
+                                    placeholder="YYYY-MM-DD"
+                                    value="<?php echo htmlspecialchars($result['since'] ?? '', ENT_QUOTES); ?>"
+                                />
                             </div>
 
+                            <!------------------------------------------------------------------------------------------
+                            Filter Until
+                            ------------------------------------------------------------------------------------------->
                             <div class="col-12 col-sm-6 col-md-6 col-lg-3">
-                                <label class="mb-0" for="frm-until">Until:</label>
-                                <input type="date"
-                                       name="until"
-                                       id="frm-until"
-                                       placeholder="YYYY-MM-DD"
-                                       class="form-control form-control-sm mb-2"
-                                       value="<?php echo htmlspecialchars($result['until'] ?? '', ENT_QUOTES); ?>">
+                                <label
+                                    class="mb-0"
+                                    for="frm-until">
+                                    Until:
+                                </label>
+                                <input
+                                    id="frm-until"
+                                    class="form-control form-control-sm mb-2"
+                                    type="date"
+                                    name="until"
+                                    placeholder="YYYY-MM-DD"
+                                    value="<?php echo htmlspecialchars($result['until'] ?? '', ENT_QUOTES); ?>"
+                                />
                             </div>
                         </div>
 
-                        <div class="form-row align-middle">
-                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
-                                <button id="btn-submit" type="submit" class="btn btn-primary btn-sm btn-block">Generate</button>
-                                <span id="btn-loading" class="d-none btn btn-primary btn-sm btn-block disabled">
-                                        Generating...
-                                    </span>
+                        <div class="form-row">
+
+                            <div class="col-12 col-sm-6 col-lg-3 my-2 mb-sm-0 order-sm-2 offset-lg-6 d-flex justify-content-between">
+
+                                <div class="btn-group w-100" role="group" aria-label="Basic example">
+                                    <div id="defined-date-day" class="btn btn-sm btn-outline-secondary active">Today</div>
+                                    <div id="defined-date-wtd" class="btn btn-sm btn-outline-secondary">WTD</div>
+                                    <div id="defined-date-mtd" class="btn btn-sm btn-outline-secondary">MTD</div>
+                                    <div id="defined-date-ytd" class="btn btn-sm btn-outline-secondary">YTD</div>
+                                </div>
+
+                                <!--
+                                <label
+                                    class="mb-0 d-none"
+                                    for="frm-organization">
+                                    Pre-Defined:
+                                </label>
+
+                                <select
+                                        id="defined-dates"
+                                        class="form-control form-control-sm"
+                                        name="defined-dates">
+
+                                    <option value="today">Today</option>
+                                </select>
+                                -->
                             </div>
 
-                            <div id="notice" class="col-12 col-sm-6 col-md-6 col-lg-6 offset-lg-3 mt-3 mt-sm-0 d-flex justify-content-center justify-content-sm-end">
-                                <div id="notice-message" class="align-self-center"></div>
+                            <!------------------------------------------------------------------------------------------
+                            Filter Submit
+                            ------------------------------------------------------------------------------------------->
+                            <div class="col-12 col-sm-6 col-lg-3 mt-2 order-sm-1">
+                                <button
+                                    id="btn-submit"
+                                    class="btn btn-primary btn-sm btn-block"
+                                    type="submit">
+                                    Generate
+                                </button>
+                            </div>
+
+
+
+                        </div>
+
+                        <div class="form-row" style="padding-left:5px; padding-right:5px;">
+                            <!------------------------------------------------------------------------------------------
+                            Filter Notices
+                            ------------------------------------------------------------------------------------------->
+                            <div
+                                id="notice"
+                                class="alert alert-danger col-12 mt-3 mb-0 d-none"
+                                >
+
+                                <!--
+                                <div
+                                    id="notice-message"
+                                    class="align-self-center">
+
+                                </div>
+                                -->
                             </div>
                         </div>
+
+
+
                     </form>
-
                 </div>
             </div>
         </div>
     </div>
+
+
+
 
     <div id="results"></div>
 
@@ -197,6 +306,57 @@ Custom JavaScript...
         return string.length >= width ? string : new Array(width - string.length + 1).join(char) + string;
     }
 
+    function hideNotice() {
+
+        let $notice = $("#notice");
+        let visible = !$notice.hasClass("d-none");
+
+        if(!visible)
+            return;
+
+        $notice.slideToggle(250, function() {
+
+            $notice.removeClass("d-flex");
+            $notice.addClass("d-none");
+
+            $notice.html("");
+
+            // Remove any previous alert-* classes!
+            $notice.removeClass (function (index, className) {
+                return (className.match (/(^|\s)alert-\S+/g) || []).join(' ');
+            });
+
+        });
+
+    }
+
+    function showNotice(message, bsColor = "danger") {
+
+        if(message === undefined || message === null || message === "")
+            return;
+
+        let $notice = $("#notice");
+        let visible = !$notice.hasClass("d-none");
+
+        // TODO: Handle checking for only viable Bootstrap color classes here?
+
+        // Add the provided class.
+        $notice.addClass("alert-" + bsColor);
+
+        // Update the notice.
+        $notice.html(message);
+
+        if(!visible) {
+
+            // Toggle visibility!
+            $notice.removeClass("d-none");
+            $notice.addClass("d-flex");
+
+            $notice.hide();
+            $notice.slideToggle();
+        }
+    }
+
 
     $(function() {
 
@@ -209,13 +369,30 @@ Custom JavaScript...
 
     });
 
+    let buttonClicked = false;
+    let buttonHtml = "";
+
     $("#btn-submit").on("click", function(e) {
 
         e.preventDefault();
 
+        if(buttonClicked)
+            return;
+
+        buttonClicked = true;
+
+        //console.log("Clicked");
+
         let organizationId  = $("#frm-organization").val();
         let since           = $("#frm-since").val();
         let until           = $("#frm-until").val();
+
+        //let $notice = $("#notice");
+        //hideNotice();
+
+        let $button = $("#btn-submit");
+        buttonHtml = $button.html();
+        $button.html("<i class='fas fa-spinner fa-spin'></i>");
 
 
         $.get("public.php?/generator.php", {
@@ -230,17 +407,24 @@ Custom JavaScript...
             let $message = $("#notice-message");
 
             if(data === null || data === "") {
-                $notice.addClass("text-danger");
-                $message.text("No results found!");
+                showNotice("No results found!", "danger");
             } else {
-                $notice.removeClass("text-danger");
-                $message.text("");
+                hideNotice();
             }
 
             $("#results").html(data);
 
 
-        });
+        })
+            .always(function() {
+
+                let $button = $("#btn-submit");
+                $button.html(buttonHtml);
+
+                $button.blur();
+
+                buttonClicked = false;
+            });
 
 
     });
@@ -255,6 +439,64 @@ Custom JavaScript...
 
 
     }).trigger("resize");
+
+
+
+
+    $("div[id^=defined-date-]").on("click", function() {
+
+        // Start by removing the active class from all of the buttons!
+        $("div[id^=defined-date-]").each(function() {
+            $(this).removeClass("active");
+        });
+
+
+        let $this = $(this);
+        let id = $this.attr("id").replace("defined-date-", "");
+
+        let $since = $("#frm-since");
+        let $until = $("#frm-until");
+
+        let today = new Date();
+        let since = today.getFullYear() + "-" + pad(today.getMonth() + 1, 2) + "-" + pad(today.getDate(), 2);
+        let until = today.getFullYear() + "-" + pad(today.getMonth() + 1, 2) + "-" + pad(today.getDate(), 2);
+
+        switch(id) {
+
+            case "day":
+                // Already set!
+                break;
+
+            case "wtd":
+                let wtd = new Date();
+                let firstOfWeek = wtd.getDate() - wtd.getDay();
+                let firstDay = new Date(wtd.setDate(firstOfWeek));
+                since = firstDay.getFullYear() + "-" + pad(firstDay.getMonth() + 1, 2) + "-" + pad(firstDay.getDate(), 2);
+                break;
+
+            case "mtd":
+                let mtd = new Date();
+                since = mtd.getFullYear() + "-" + pad(mtd.getMonth() + 1, 2) + "-" + "01";
+                break;
+
+            case "ytd":
+                let ytd = new Date();
+                since = ytd.getFullYear() + "-" + "01" + "-" + "01";
+                break;
+
+            default:
+                // Do nothing!
+                break;
+        }
+
+        $since.val(since);
+        $until.val(until);
+
+        $this.addClass("active");
+
+        $("#btn-submit").trigger("click");
+
+    });
 
 
 
