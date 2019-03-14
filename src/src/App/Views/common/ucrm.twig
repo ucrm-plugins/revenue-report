@@ -2,20 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Home</title>
+    <title>{{ title|default("Plugin") }}</title>
 
     {# UCRM UI Stylesheets #}
+    <!--
     <link rel="stylesheet" href="/assets/fonts/lato/lato.css?v=2.15.0-beta5">
     <link rel="stylesheet" href="/assets/fonts/ubnt-icon/ubnt-icon.css?v=2.15.0-beta5">
     <link rel="stylesheet" href="/assets/fonts/ucrm-icon/style.css?v=2.15.0-beta5">
     <link rel="stylesheet" href="/assets/vendor/jquery-ui/themes/smoothness/jquery-ui.min.css?v=2.15.0-beta5">
     <link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css?v=2.15.0-beta5">
     <link rel="stylesheet" href="/dist/main.min.css?v=2.15.0-beta5">
+    -->
 
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
-          crossorigin="anonymous">
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Lato">
+
+    <!------------------------------------------------------------------------------------------------------------------
+    Load FontAwesome Styles
+    ------------------------------------------------------------------------------------------------------------------->
+    <!--suppress SpellCheckingInspection -->
+    <link
+        rel="stylesheet"
+        href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+        integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
+        crossorigin="anonymous">
+
+    <!------------------------------------------------------------------------------------------------------------------
+    Load Bootstrap Styles
+    ------------------------------------------------------------------------------------------------------------------->
+    <!--suppress SpellCheckingInspection -->
+    <link
+        rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+        crossorigin="anonymous">
 
     {# Override Bootstrap classes when necessary to keep similar UCRM formatting! #}
     <style>
@@ -26,82 +47,152 @@
         */
     </style>
 
-    <link rel="stylesheet" href="public/css/main.css">
+    <link rel="stylesheet" href="?/css/main.css">
 
-    {% block styles %}{% endblock %}
 
-    {# UCRM UI Scripts #}
-    <script type="text/javascript" src="/dist/jquery.min.js?v=2.15.0-beta5"></script>
 
     {% block scripts %}{% endblock %}
 
 </head>
 
 <body>
-<div id="header">
-    <h1 class="float-left mr-3">Revenue Report</h1>
+
+<div id="header" class="text-center text-sm-left">
+    <h1 class="float-sm-left mr-sm-3 mb-2 mb-sm-0">Revenue Report</h1>
     <a href="https://github.com/ucrm-plugins/revenue-report" target="_blank" class="button button--icon-only">
         <img src="?/images/github/logo-32px.png" alt="GitHub" height=16>
     </a>
 </div>
 
-<div id="content" class="container container-fluid ml-0 mr-0">
-    <div class="row mb-4">
+<div id="content" class="container-fluid ml-0 mr-0 p-1 p-sm-3">
+
+    <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card mb-1 mb-sm-3">
                 <div class="card-body">
+                    <div class="card-title">
+                        <h5>Filter</h5>
+                    </div>
                     <form id="report-form">
-                        <div class="form-row align-items-end">
-                            <div class="col-3">
-                                <label class="mb-0" for="frm-organization"><small>Organization:</small></label>
-                                <select name="organization" id="frm-organization" class="form-control form-control-sm">
+                        <div class="form-row mb-2">
+                            <div class="col-12 col-sm-12 col-md-12 col-lg-6">
+                                <label class="mb-0" for="frm-organization">Organization:</label>
+                                <select name="organization" id="frm-organization" class="form-control form-control-sm mb-2">
                                     <?php
-                                        foreach ($organizations as $organization) {
-                                            printf(
-                                                '<option value="%d" %s>%s</option>',
-                                    $organization['id'],
-                                    (int) ($result['organization'] ?? 0) === (int) $organization['id']
-                                    ? 'selected'
-                                    : '',
-                                    htmlspecialchars($organization['name'], ENT_QUOTES)
-                                    );
+
+                                // =================================================================================
+                                // DATABASE CONNECTION
+                                // =================================================================================
+
+                                $host = getenv("POSTGRES_HOST");
+                                $port = getenv("POSTGRES_PORT");
+                                $name = getenv("POSTGRES_DB");
+                                $user = getenv("POSTGRES_USER");
+                                $pass = getenv("POSTGRES_PASSWORD");
+
+                                $db = \MVQN\Data\Database::connect($host, (int)$port, $name, $user, $pass);
+
+                                $organizations = $db->query(
+                                    "
+                                    SELECT organization_id, selected, name
+                                    FROM organization;
+                                    "
+                                    )->fetchAll();
+
+                                    //$organizations = \UCRM\REST\Endpoints\Organization::get()->toArray();
+
+                                    /** @var \UCRM\REST\Endpoints\Organization $organization */
+                                    foreach ($organizations as $key => $organization) {
+                                    /*
+                                    echo
+                                    "<option value='{$organization->getID()}' ".
+                                    ($organization->getSelected() ? "selected" : "").">".
+                                    $organization->getName()."</option>";
+                                    */
+                                    echo
+                                    "<option value='{$organization['organization_id']}' ".
+                                    ($organization['selected'] ? "selected" : "").">".
+                                    $organization['name']."</option>";
                                     }
                                     ?>
                                 </select>
                             </div>
 
-                            <div class="col-3">
-                                <label class="mb-0" for="frm-since"><small>Since:</small></label>
-                                <input type="date" name="since" id="frm-since" placeholder="YYYY-MM-DD" class="form-control form-control-sm" value="<?php echo htmlspecialchars($result['since'] ?? '', ENT_QUOTES); ?>">
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <label class="mb-0" for="frm-since">Since:</label>
+                                <input type="date"
+                                       name="since"
+                                       id="frm-since"
+                                       placeholder="YYYY-MM-DD"
+                                       class="form-control form-control-sm mb-2"
+                                       value="<?php echo htmlspecialchars($result['since'] ?? '', ENT_QUOTES); ?>">
                             </div>
 
-                            <div class="col-3">
-                                <label class="mb-0" for="frm-until"><small>Until:</small></label>
-                                <input type="date" name="until" id="frm-until" placeholder="YYYY-MM-DD" class="form-control form-control-sm" value="<?php echo htmlspecialchars($result['until'] ?? '', ENT_QUOTES); ?>">
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <label class="mb-0" for="frm-until">Until:</label>
+                                <input type="date"
+                                       name="until"
+                                       id="frm-until"
+                                       placeholder="YYYY-MM-DD"
+                                       class="form-control form-control-sm mb-2"
+                                       value="<?php echo htmlspecialchars($result['until'] ?? '', ENT_QUOTES); ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-row align-middle">
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <button id="btn-submit" type="submit" class="btn btn-primary btn-sm btn-block">Generate</button>
+                                <span id="btn-loading" class="d-none btn btn-primary btn-sm btn-block disabled">
+                                    Generating...
+                                </span>
                             </div>
 
-                            <div class="col-auto ml-auto">
-                                <button id="btn-submit" type="submit" class="btn btn-primary btn-sm pl-4 pr-4">Generate</button>
-                                <span id="btn-loading" class="d-none btn btn-primary btn-sm pl-4 pr-4 disabled">
-                                        Generating...
-                                    </span>
+                            <div id="notice" class="col-12 col-sm-6 col-md-6 col-lg-6 offset-lg-3 mt-3 mt-sm-0 d-flex justify-content-center justify-content-sm-end">
+                                <div id="notice-message" class="align-self-center"></div>
                             </div>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="results"></div>
+
+
+
+
 
 </div>
 
+
+
+
+
 {# UCRM UI Scripts #}
-{#<script src="/dist/app.min.js?v=2.15.0-beta5" type="text/javascript"></script>#}
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.bundle.min.js"
-        integrity="sha384-zDnhMsjVZfS3hiP7oCBRmfjkQC4fzxVxFhBx8Hkz2aZX8gEvA/jsP3eXRCvzTofP"
-        crossorigin="anonymous">
+
+<!--suppress SpellCheckingInspection -->
+<script
+    src="http://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous">
 </script>
+
+<!--suppress SpellCheckingInspection -->
+<script
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.bundle.min.js"
+    integrity="sha384-zDnhMsjVZfS3hiP7oCBRmfjkQC4fzxVxFhBx8Hkz2aZX8gEvA/jsP3eXRCvzTofP"
+    crossorigin="anonymous">
+</script>
+
+<!----------------------------------------------------------------------------------------------------------------------
+Load Chart JS Files
+----------------------------------------------------------------------------------------------------------------------->
+<script
+        src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js">
+</script>
+
 
 </body>
 </html>
