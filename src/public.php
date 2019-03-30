@@ -34,6 +34,8 @@ use UCRM\HTTP\Slim\Controllers\Common;
 
     new Controllers\ExampleController($app);
 
+    new Controllers\ApiController($app);
+
     // TODO: Add additional custom routes here!
     // ...
 

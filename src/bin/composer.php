@@ -2,7 +2,9 @@
 declare(strict_types=1);
 require __DIR__.'/../vendor/autoload.php';
 
+use Dotenv\Dotenv;
 use UCRM\Common\Plugin;
+use UCRM\SFTP\SftpClient;
 
 /**
  * composer.php
@@ -26,7 +28,7 @@ define("PLUGIN_NAME", baseName(realpath(__DIR__ . "/../../")));
 if(file_exists(__DIR__ . "/../../.env"))
 {
     define("PLUGIN_MODE", "DEV");
-    (new \Dotenv\Dotenv(__DIR__ . "/../../"))->load();
+    (new Dotenv(__DIR__ . "/../../"))->load();
 }
 
 
@@ -51,7 +53,7 @@ switch ($argv[1])
         $user = getenv("SFTP_USER");
         $pass = getenv("SFTP_PASS");
 
-        $sftp = new \UCRM\SFTP\SftpClient($host, $port);
+        $sftp = new SftpClient($host, $port);
         $sftp->login($user, $pass);
         $sftp->setRemoteBasePath("/home/ucrm/data/ucrm/ucrm/data/plugins/".PLUGIN_NAME."/");
         $sftp->setLocalBasePath(__DIR__."/../");

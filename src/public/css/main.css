@@ -1,8 +1,10 @@
-* {
+*
+{
     font-family: Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-body {
+body
+{
     position: relative;
     background-color: #edf0f3;
     overflow-x: hidden;
@@ -10,7 +12,8 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-#header > h1 {
+#header > h1
+{
     margin: 0;
     color: #4c4c4c;
     font-size: 22px;
@@ -18,7 +21,8 @@ body {
     font-weight: 300;
 }
 
-#header {
+#header
+{
     display: block;
     margin: 0;
     background: #fff;
@@ -26,28 +30,35 @@ body {
     padding: 15px 32px;
 }
 
-#content {
+#content
+{
     padding: 18px 32px 32px;
     height: 100%;
 }
 
-#notice-container {
+#notice-container
+{
     position:absolute;
     top:0;
 }
 
 /* Small devices (landscape phones, 576px and up) */
-@media (min-width: 576px) {
-    .w-sm-25 {
+@media (min-width: 576px)
+{
+    .w-sm-25
+    {
         width: 25% !important;
     }
-    .w-sm-50 {
+    .w-sm-50
+    {
         width: 50% !important;
     }
-    .w-sm-75 {
+    .w-sm-75
+    {
         width: 75% !important;
     }
-    .w-sm-100 {
+    .w-sm-100
+    {
         width: 100% !important;
     }
 }

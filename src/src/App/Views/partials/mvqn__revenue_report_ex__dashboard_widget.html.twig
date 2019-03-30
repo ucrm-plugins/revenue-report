@@ -1,0 +1,56 @@
+{% if overviewData and (isViewPermissionGranted('AppBundle\\Controller\\ClientController') or isSpecialPermissionGranted(constant('AppBundle\\Security\\SpecialPermission::FINANCIAL_OVERVIEW'))) %}
+    <div class="card {% if not user.userPersonalization.dashboardShowOverview %}off{% endif %}" id="card-overview">
+        <div class="card-header">
+            <div class="card-header__title">
+                {% trans %}Expected Monthly Revenue{% endtrans %}
+            </div>
+            <div class="card-header__actions">
+                <span id="mvqn_revenue-report-ex__total">$0.00</span>
+            </div>
+        </div>
+
+        <div class="card-block" id="dashboard-overview">
+            <hr class="card__hr card__hr--separator">
+            {#{% for currency, financialOverviewData in overviewData.invoicingOverviewByCurrencies %}#}
+            <table class="details-table details-table--narrow noMarginBottom">
+                <tr>
+                    <th data-tooltip="{% trans %}Total of all Service Plans{% endtrans %}">
+                        {% trans %}Service Plans{% endtrans %}
+                    </th>
+                    <td class="noWrap alignRight verticalAlignTop">
+                        <span id="mvqn__revenue-report-ex__services">$0.00</span>
+                    </td>
+                    <th data-tooltip="{% trans %}Total of all Surcharges{% endtrans %}">
+                        {% trans %}Surcharges{% endtrans %}</th>
+                    <td class="noWrap alignRight verticalAlignTop">
+                        <span id="mvqn__revenue-report-ex__surcharges">$0.00</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th data-tooltip="{% trans %}Total of all Discounts{% endtrans %}">
+                        {% trans %}Discounts{% endtrans %}
+                    </th>
+                    <td class="noWrap alignRight verticalAlignTop">
+                        <span id="mvqn__revenue-report-ex__discounts">$0.00</span>
+                    </td>
+                    <th data-tooltip="{% trans %}Total of all Taxes{% endtrans %}">
+                        {% trans %}Taxes{% endtrans %}
+                    </th>
+                    <td class="noWrap alignRight verticalAlignTop">
+                        <span id="mvqn__revenue-report__taxes">$0.00</span>
+                    </td>
+                </tr>
+            </table>
+            {#{% endfor %}#}
+        </div>
+    </div>
+
+    <script>
+        // Make an AJAX call to our plugin for all of the information!
+
+        $("#mvqn-revenue-report-ex__total").html("$2,000.00");
+
+
+
+    </script>
+{% endif %}
