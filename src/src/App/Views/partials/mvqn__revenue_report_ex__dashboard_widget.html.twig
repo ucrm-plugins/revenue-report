@@ -2,10 +2,12 @@
     <div class="card {% if not user.userPersonalization.dashboardShowOverview %}off{% endif %}" id="card-overview">
         <div class="card-header">
             <div class="card-header__title">
-                {% trans %}Expected Monthly Revenue{% endtrans %}
+                {% trans %}Expected Monthly Revenue{% endtrans %}<br/>
+                <span style="font-size:smaller; font-weight:lighter; text-transform:none !important;"
+                      id="mvqn__revenue-report-ex__dates">Loading...</span>
             </div>
             <div class="card-header__actions">
-                <span id="mvqn_revenue-report-ex__total">$0.00</span>
+                <span id="mvqn__revenue-report-ex__total">-</span>
             </div>
         </div>
 
@@ -18,12 +20,12 @@
                         {% trans %}Service Plans{% endtrans %}
                     </th>
                     <td class="noWrap alignRight verticalAlignTop">
-                        <span id="mvqn__revenue-report-ex__services">$0.00</span>
+                        <span id="mvqn__revenue-report-ex__services">-</span>
                     </td>
                     <th data-tooltip="{% trans %}Total of all Surcharges{% endtrans %}">
                         {% trans %}Surcharges{% endtrans %}</th>
                     <td class="noWrap alignRight verticalAlignTop">
-                        <span id="mvqn__revenue-report-ex__surcharges">$0.00</span>
+                        <span id="mvqn__revenue-report-ex__surcharges">-</span>
                     </td>
                 </tr>
                 <tr>
@@ -31,13 +33,13 @@
                         {% trans %}Discounts{% endtrans %}
                     </th>
                     <td class="noWrap alignRight verticalAlignTop">
-                        <span id="mvqn__revenue-report-ex__discounts">$0.00</span>
+                        <span id="mvqn__revenue-report-ex__discounts">-</span>
                     </td>
                     <th data-tooltip="{% trans %}Total of all Taxes{% endtrans %}">
                         {% trans %}Taxes{% endtrans %}
                     </th>
                     <td class="noWrap alignRight verticalAlignTop">
-                        <span id="mvqn__revenue-report__taxes">$0.00</span>
+                        <span id="mvqn__revenue-report-ex__taxes">-</span>
                     </td>
                 </tr>
             </table>
@@ -46,9 +48,70 @@
     </div>
 
     <script>
+
+        const getLang =
+            () => navigator.language || /* navigator.browserLanguage || */ ( navigator.languages || [ "en-US" ] )[ 0 ];
+
+        function pad(string, width, char) {
+            char = char || "0";
+            string = string + "";
+            return string.length >= width ? string : new Array(width - string.length + 1).join(char) + string;
+        }
+
+        function localeCurrency(value, lang, code) {
+
+            return Number(value).toLocaleString(lang, { style: "currency", currency: code })
+
+        }
+
+
         // Make an AJAX call to our plugin for all of the information!
 
-        $("#mvqn-revenue-report-ex__total").html("$2,000.00");
+
+
+
+        $.get("/_plugins/revenue-report-ex/public.php?/api/expected", {
+
+            /*
+            "frm-organization": organizationId,
+            "frm-since": since,
+            "frm-until": until
+            */
+
+        }, function(data) {
+
+            let since = new Date(data.ranges.since);
+            let until = new Date(data.ranges.until);
+
+
+
+            $("#mvqn__revenue-report-ex__dates").html(
+                "<em>(" + since.toLocaleDateString() + " to " + until.toLocaleDateString() + ")</em>"
+            );
+
+            console.log(data);
+
+            let lang = data.locale.language;
+            let code = data.locale.currency.code;
+
+            $("#mvqn__revenue-report-ex__total").html(localeCurrency(data.totals.grand, lang, code));
+            $("#mvqn__revenue-report-ex__services").html(localeCurrency(data.totals.services, lang, code));
+            $("#mvqn__revenue-report-ex__surcharges").html(localeCurrency(data.totals.surcharges, lang, code));
+            $("#mvqn__revenue-report-ex__discounts").html(localeCurrency(data.totals.discounts, lang, code));
+            $("#mvqn__revenue-report-ex__taxes").html(localeCurrency(data.totals.taxes, lang, code));
+
+        })
+            .always(function() {
+
+
+            });
+
+
+
+
+        //$("#mvqn_revenue-report-ex__total").html("$1,000.00");
+
+
 
 
 

@@ -90,6 +90,12 @@ let buttonHtml = "";
 
 $("#btn-submit").on("click", function(e) {
 
+    let $readMoreToggle = $("#read-more-toggle");
+    let $readMoreContents = $("#read-more-contents");
+
+    if($readMoreContents.hasClass("show"))
+        $readMoreToggle.trigger("click");
+
     e.preventDefault();
 
     if(buttonClicked)
