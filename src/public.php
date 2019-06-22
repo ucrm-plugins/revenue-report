@@ -28,16 +28,20 @@ use UCRM\HTTP\Slim\Controllers\Common;
 
 
 
+
     // -----------------------------------------------------------------------------------------------------------------
     // CUSTOM ROUTES
     // -----------------------------------------------------------------------------------------------------------------
 
-    new Controllers\ExampleController($app);
+    //new Controllers\ExampleController($app);
+
 
     new Controllers\ApiController($app);
 
     // TODO: Add additional custom routes here!
     // ...
+
+    //echo "Test";
 
 
 

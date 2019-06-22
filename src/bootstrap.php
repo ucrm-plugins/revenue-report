@@ -64,7 +64,9 @@ $restUrl =
 
 // OVERRIDE WITH KNOWN GOOD VALUES!!!
 // TODO: Using to debug some "unable to connect" errors by cURL!
-$restUrl = (isset($_SERVER['HTTPS']) ? "https://localhost" : "http://localhost")."/api/v1.0";
+//$restUrl = (isset($_SERVER['HTTPS']) ? "https://localhost" : "http://localhost")."/api/v1.0";
+//$restUrl = "https://ucrm.dev.mvqn.net/api/v1.0";
+$restUrl = Settings::UCRM_PUBLIC_URL . "/api/v1.0";
 
 // Configure the REST Client...
 RestClient::setBaseUrl($restUrl);
@@ -75,7 +77,7 @@ RestClient::setHeaders([
 
 try
 {
-    Log::clear();
+    //Log::clear();
     Log::info("Using REST URL: '".$restUrl."'");
     $version = \UCRM\REST\Endpoints\Version::get();
     Log::info("REST API Test : '".$version."'");
