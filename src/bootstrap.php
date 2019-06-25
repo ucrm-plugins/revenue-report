@@ -13,6 +13,8 @@ use UCRM\Common\Plugin;
 use UCRM\HTTP\Twig\Extensions\PluginExtension;
 use UCRM\HTTP\Slim\Middleware\QueryStringRouter;
 
+use UCRM\REST\Endpoints\Version;
+
 use App\Settings;
 
 use Slim\Container;
@@ -35,7 +37,16 @@ use Slim\Views\TwigExtension;
 // =====================================================================================================================
 
 // Initialize the Plugin libraries using this directory as the plugin root!
-Plugin::initialize(__DIR__);
+Plugin::initialize(__DIR__, [
+    "modules" => [
+        Plugin::MODULE_DATA,
+        Plugin::MODULE_HTTP,
+        Plugin::MODULE_REST,
+        //Plugin::MODULE_SMTP,
+    ]
+]);
+
+
 
 // Regenerate the Settings class, in case anything has changed in the manifest.json file.
 Plugin::createSettings("App", "Settings");
@@ -53,20 +64,20 @@ if(file_exists(__DIR__."/../.env"))
 // =====================================================================================================================
 
 // Generate the REST API URL from either an ENV variable (including from .env file),  or fallback to localhost.
-/*
+
 $restUrl =
     rtrim(
         getenv("REST_URL") ?:                                                           // .env (or ENV variable)
         Settings::UCRM_LOCAL_URL ?:                                                     // ucrm.json
         (isset($_SERVER['HTTPS']) ? "https://localhost/" : "http://localhost/"),        // By initial request
     "/")."/api/v1.0";
-*/
+
 
 // OVERRIDE WITH KNOWN GOOD VALUES!!!
 // TODO: Using to debug some "unable to connect" errors by cURL!
 //$restUrl = (isset($_SERVER['HTTPS']) ? "https://localhost" : "http://localhost")."/api/v1.0";
 //$restUrl = "https://ucrm.dev.mvqn.net/api/v1.0";
-$restUrl = Settings::UCRM_PUBLIC_URL . "/api/v1.0";
+//$restUrl = Settings::UCRM_PUBLIC_URL . "/api/v1.0";
 
 // Configure the REST Client...
 RestClient::setBaseUrl($restUrl);
@@ -77,10 +88,30 @@ RestClient::setHeaders([
 
 try
 {
-    //Log::clear();
-    Log::info("Using REST URL: '".$restUrl."'");
-    $version = \UCRM\REST\Endpoints\Version::get();
-    Log::info("REST API Test : '".$version."'");
+    // TODO: Add code to only perform these checks when in DEBUG mode!
+
+    Log::clear();
+    Log::write("----------------------------------------");
+
+    // "https://billing.ridgecomms.com/api/v1.0"
+
+    //$hostname = parse_url("https://billing.ridgecomms.com/api/v1.0")["host"];
+    $hostname = parse_url($restUrl)["host"];
+
+    $ip = gethostbyname($hostname);
+    if($ip === $hostname)
+    {
+        Log::debug("Hostname '$hostname' could not be resolved!");
+    }
+    else
+    {
+        $ping = shell_exec("ping -c 1 $ip");
+        $status = $ping !== null ? "SUCCEEDED!" : "FAILED!";
+
+        Log::debug("Pinging: $hostname ($ip)...$status");
+    }
+    $version = Version::get();
+    Log::debug("$restUrl/version => $version");
 }
 catch(\Exception $e)
 {
