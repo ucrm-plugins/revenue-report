@@ -41,15 +41,14 @@
     },
     "scripts": {
         "sync": [
-            "@php bin/composer.php sync"
+            "upm sync"
         ],
         "create": [
-            "@php bin/composer.php sync",
-            "@php bin/composer.php create"
+            "upm create"
         ],
         "bundle": [
             "@composer --no-interaction --verbose dump-autoload",
-            "@php bin/composer.php bundle"
+            "upm bundle"
         ]
 
     }

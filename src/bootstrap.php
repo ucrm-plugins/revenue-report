@@ -37,6 +37,7 @@ use Slim\Views\TwigExtension;
 // =====================================================================================================================
 
 // Initialize the Plugin libraries using this directory as the plugin root!
+
 Plugin::initialize(__DIR__, [
     "modules" => [
         Plugin::MODULE_DATA,

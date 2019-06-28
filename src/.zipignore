@@ -8,7 +8,6 @@ data/plugin.log
 ucrm.json
 
 # Exclude development files
-bin/composer.php
-bin/translations.php
+bin/
 
 src/App/Settings.php

@@ -764,16 +764,16 @@
         },
         {
             "name": "mvqn/ucrm-plugin-sdk",
-            "version": "1.2.4",
+            "version": "1.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mvqn/ucrm-plugin-sdk.git",
-                "reference": "a0dce90c9e6838c2f0e11cfa59f36bfa9a1c72be"
+                "reference": "8cd59030d51445316e12104f8941012a4a889377"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mvqn/ucrm-plugin-sdk/zipball/a0dce90c9e6838c2f0e11cfa59f36bfa9a1c72be",
-                "reference": "a0dce90c9e6838c2f0e11cfa59f36bfa9a1c72be",
+                "url": "https://api.github.com/repos/mvqn/ucrm-plugin-sdk/zipball/8cd59030d51445316e12104f8941012a4a889377",
+                "reference": "8cd59030d51445316e12104f8941012a4a889377",
                 "shasum": ""
             },
             "require": {
@@ -795,6 +795,9 @@
                 "php": "~7.2",
                 "phpunit/phpunit": "^8"
             },
+            "bin": [
+                "bin/upm"
+            ],
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -815,7 +818,7 @@
                 }
             ],
             "description": "An alternative UCRM SDK designed to ease Plugin development.",
-            "time": "2019-06-25T22:00:04+00:00"
+            "time": "2019-06-27T03:37:30+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -2884,7 +2887,7 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v4.3.1",
+            "version": "v4.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
