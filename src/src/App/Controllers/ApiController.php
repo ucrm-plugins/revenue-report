@@ -10,6 +10,7 @@ use Slim\Http\Response;
 use MVQN\Data\Database;
 
 use UCRM\Common\Config;
+use UCRM\Common\Log;
 use UCRM\REST\Endpoints\Client;
 use UCRM\REST\Endpoints\Currency;
 use UCRM\REST\Endpoints\Organization;
@@ -372,11 +373,17 @@ final class ApiController
                         $since          = $params["since"]          ?? date("Y-m-1", strtotime($today));
                         $until          = $params["until"]          ?? date("Y-m-t", strtotime($since));
 
+                        Log::debug("Organization ID: $organizationId");
+                        Log::debug("Since (UTC)    : $since");
+                        Log::debug("Until (UTC)    : $until");
+
                         // ---------------------------------------------------------------------------------------------
                         // TIMEZONE ADJUSTMENTS
                         // ---------------------------------------------------------------------------------------------
 
                         $timezone = Config::getTimezone();
+
+                        Log::debug("Timezone       : $timezone");
 
                         // Adjust the dates to start/end of the provided dates, and then adjust them to UTC, as that is
                         // how the DB stores them!
@@ -388,6 +395,8 @@ final class ApiController
                         $sinceSQL = $since->format("Y-m-d");
                         $untilSQL = $until->format("Y-m-d");
 
+                        Log::debug("Since (SQL)    : $sinceSQL");
+                        Log::debug("Until (SQL)    : $untilSQL");
 
                         /** @var Organization $organization */
                         $organization = Organization::getById($organizationId);
@@ -395,6 +404,8 @@ final class ApiController
 
                         /** @var Currency $currency */
                         $currency = Currency::getById($currencyId);
+
+                        Log::debug("Currency       : $currency");
 
                         // ---------------------------------------------------------------------------------------------
                         // DATABASE CONNECTION
@@ -406,7 +417,15 @@ final class ApiController
                         $user = getenv("POSTGRES_USER");
                         $pass = getenv("POSTGRES_PASSWORD");
 
+                        $dbString = "pgsql://$user:$pass@$host:$port/$name";
+
+                        Log::debug("DB Connection  : $dbString");
+
                         $db = Database::connect($host, (int)$port, $name, $user, $pass);
+
+                        Log::debug("DB Status      : " . $db->getAttribute(\PDO::ATTR_CONNECTION_STATUS));
+
+                        Log::debug("UCRM Language  : " . Config::getLanguage());
 
                         $data = [
 

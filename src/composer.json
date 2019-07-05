@@ -13,6 +13,7 @@
         "ext-json": "*",
         "ext-zip": "*",
         "ext-ssh2": "*",
+        "ext-pdo":"*",
 
         "mvqn/localization": "1.*",
         "mvqn/twig": "1.*",
