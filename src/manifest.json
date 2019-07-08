@@ -5,7 +5,7 @@
         "displayName": "Revenue Report (EX)",
         "description": "An extended and modified version of the Revenue Report plugin for UCRM.",
         "url": "https://github.com/ucrm-plugins/revenue-report",
-        "version": "1.2.4",
+        "version": "1.2.5",
         "ucrmVersionCompliancy": {
             "min": "2.16.0",
             "max": null

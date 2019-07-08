@@ -400,11 +400,13 @@ final class ApiController
 
                         /** @var Organization $organization */
                         $organization = Organization::getById($organizationId);
+                        Log::debug("Organization   : $organization");
+
                         $currencyId = $organization->getCurrencyId();
+                        Log::debug("Currency ID    : $currencyId");
 
                         /** @var Currency $currency */
                         $currency = Currency::getById($currencyId);
-
                         Log::debug("Currency       : $currency");
 
                         // ---------------------------------------------------------------------------------------------

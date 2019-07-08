@@ -24,6 +24,10 @@ use Slim\Http\Response;
 use Slim\Http\Uri;
 use Slim\Views\TwigExtension;
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+
 /**
  * bootstrap.php
  *
@@ -48,7 +52,6 @@ Plugin::initialize(__DIR__, [
 ]);
 
 
-
 // Regenerate the Settings class, in case anything has changed in the manifest.json file.
 Plugin::createSettings("App", "Settings");
 
@@ -58,7 +61,9 @@ Plugin::createSettings("App", "Settings");
 
 // IF an .env file exists in the project, THEN load it!
 if(file_exists(__DIR__."/../.env"))
+{
     (new \Dotenv\Dotenv(__DIR__."/../"))->load();
+}
 
 // =====================================================================================================================
 // REST CLIENT
@@ -69,9 +74,9 @@ if(file_exists(__DIR__."/../.env"))
 $restUrl =
     rtrim(
         getenv("REST_URL") ?:                                                           // .env (or ENV variable)
-        Settings::UCRM_LOCAL_URL ?:                                                     // ucrm.json
-        (isset($_SERVER['HTTPS']) ? "https://localhost/" : "http://localhost/"),        // By initial request
-    "/")."/api/v1.0";
+            Settings::UCRM_LOCAL_URL ?:                                                     // ucrm.json
+                (isset($_SERVER['HTTPS']) ? "https://localhost/" : "http://localhost/"),        // By initial request
+        "/")."/api/v1.0";
 
 
 // OVERRIDE WITH KNOWN GOOD VALUES!!!
@@ -84,8 +89,18 @@ $restUrl =
 RestClient::setBaseUrl($restUrl);
 RestClient::setHeaders([
     "Content-Type: application/json",
-    "X-Auth-App-Key: " . Settings::PLUGIN_APP_KEY
+    "X-Auth-App-Key: ".Settings::PLUGIN_APP_KEY
 ]);
+
+
+/*
+$logger = new Logger("plugin");
+$fileHandler = new StreamHandler(__DIR__."/data/plugin.log", Logger::DEBUG);
+//$fileHandler->setFormatter(new \Monolog\Formatter\JsonFormatter);
+$logger->pushHandler($fileHandler);
+//$logger->debug("INFO message");
+*/
+
 
 try
 {
@@ -103,18 +118,23 @@ try
     if($ip === $hostname)
     {
         Log::debug("Hostname '$hostname' could not be resolved!");
+        //$logger->debug("Hostname '$hostname' could not be resolved!");
     }
     else
     {
         $ping = shell_exec("ping -c 1 $ip");
-        $status = $ping !== null ? "SUCCEEDED!" : "FAILED!";
+        $status = $ping !== NULL ? "SUCCEEDED!" : "FAILED!";
 
         Log::debug("Pinging: $hostname ($ip)...$status");
+        //$logger->debug("Pinging: $hostname ($ip)...$status");
+
     }
+
     $version = Version::get();
     Log::debug("$restUrl/version => $version");
-}
-catch(\Exception $e)
+    //$logger->debug("$restUrl/version => $version");
+    //Log::writeArray(debug_backtrace());
+} catch(\Exception $e)
 {
     Log::error($e->getMessage());
 }
@@ -126,10 +146,9 @@ catch(\Exception $e)
 // Set the dictionary directory and "default" locale.
 try
 {
-    Translator::setDictionaryDirectory(__DIR__ . "/translations/");
-    Translator::setCurrentLocale(str_replace("_", "-", Config::getLanguage()) ?: "en-US", true);
-}
-catch (TranslatorException $e)
+    Translator::setDictionaryDirectory(__DIR__."/translations/");
+    Translator::setCurrentLocale(str_replace("_", "-", Config::getLanguage()) ?: "en-US", TRUE);
+} catch(TranslatorException $e)
 {
     Log::http("No dictionary could be found!", 500);
 }
@@ -141,9 +160,9 @@ catch (TranslatorException $e)
 // Create Slim Framework Application, given the provided settings.
 $app = new \Slim\App([
     "settings" => [
-        "displayErrorDetails" => true,
-        "addContentLengthHeader" => false,
-        "determineRouteBeforeAppMiddleware" => true,
+        "displayErrorDetails" => TRUE,
+        "addContentLengthHeader" => FALSE,
+        "determineRouteBeforeAppMiddleware" => TRUE,
     ],
 ]);
 
@@ -155,15 +174,15 @@ $container = $app->getContainer();
 // =====================================================================================================================
 
 // Configure Twig Renderer
-$container["twig"] = function (Container $container)
+$container["twig"] = function(Container $container)
 {
     $twig = new \Slim\Views\Twig(
         [
-            __DIR__ . "/src/App/Views/",
+            __DIR__."/src/App/Views/",
         ],
         [
             //'cache' => 'path/to/cache'
-            "debug" => true,
+            "debug" => TRUE,
         ]
     );
 
@@ -183,7 +202,7 @@ $container["twig"] = function (Container $container)
 // ---------------------------------------------------------------------------------------------------------------------
 
 // Override the default 404 Page!
-$container['notFoundHandler'] = function (Container $container)
+$container['notFoundHandler'] = function(Container $container)
 {
     return function(Request $request, Response $response) use ($container): Response
     {
@@ -195,7 +214,7 @@ $container['notFoundHandler'] = function (Container $container)
             "router" => $router,
         ];
 
-        return $container->twig->render($response,"404.html.twig", $data);
+        return $container->twig->render($response, "404.html.twig", $data);
     };
 };
 
@@ -204,27 +223,25 @@ $container['notFoundHandler'] = function (Container $container)
 // =====================================================================================================================
 
 // Configure MonoLog
-$container['logger'] = function (\Slim\Container $container)
+$container['logger'] = function(\Slim\Container $container)
 {
     $logger = new Monolog\Logger("template-plugin");
     $logger->pushProcessor(new Monolog\Processor\UidProcessor());
     $logger->pushHandler(new Monolog\Handler\StreamHandler(
-        PHP_SAPI === "cli-server" ? "php://stdout" : __DIR__ . "/logs/www.log",
+        PHP_SAPI === "cli-server" ? "php://stdout" : __DIR__."/logs/www.log",
         \Monolog\Logger::DEBUG
     ));
     return $logger;
 };
 
 
-
-
-
-
-
 // Applied in Ascending order, bottom up!
-$app->add(new \UCRM\HTTP\Slim\Middleware\PluginAuthentication($container, function(\UCRM\Sessions\SessionUser $user) {
+$app->add(new \UCRM\HTTP\Slim\Middleware\PluginAuthentication($container, function(\UCRM\Sessions\SessionUser $user)
+{
     return ($user->getUserGroup() === "Admin Group");
 }));
 $app->add(new QueryStringRouter("/index.php"));
 //$app->add(new QueryStringRouter("/test.html"));
 
+//define("BOOTSTRAPPED", TRUE);
+//echo "TEST";

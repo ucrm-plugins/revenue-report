@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . "/vendor/autoload.php";
-require_once __DIR__ . "/bootstrap.php";
+require_once __DIR__ . "/vendor/autoload.php";
+require_once(realpath(dirname(__FILE__) . "/bootstrap.php"));
+
+
 
 use App\Settings;
 use App\Controllers;
@@ -61,6 +63,11 @@ use UCRM\HTTP\Slim\Controllers\Common;
 
     // Append a route handler for PHP scripts.
     new Common\ScriptController($app);
+
+    /** @var \Monolog\Logger $logger */
+    $logger = $app->getContainer()["logger"];
+    $logger->debug("Test");
+
 
     // Run the Slim Framework Application!
     $app->run();
